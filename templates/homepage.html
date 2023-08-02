@@ -381,7 +381,7 @@
                     </div>
                     <br>
                     <div class="box_chat">
-                        <div id="comment-section">
+                        <div id="comment-section-{{ post.id }}">
                             <!-- commmet will put on here -->
                         </div>   
                         {% for comment in post.commentviews_set.all %}
@@ -610,34 +610,6 @@ function closePopupAndReload() {
     }, 10);
 }
 
-// $(document).on('submit', '#send-comment', function(e) {
-//     e.preventDefault();
-//     var form = $(this);
-//     var sendcommentId = form.data('send-id');
-//     var popup_q = document.getElementById("comment-popup-" + sendcommentId);
-//     var popupScrollPosition_cmt = $(popup_q).scrollTop();
-//     var message = form.find('input[name="message"]').val();
-//     var massageImage = $("#massage_image").prop('files')[0];
-//     var formData = new FormData();
-//     formData.append('message', message);
-//     formData.append('massage_image', massageImage);
-//     formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
-//     $.ajax({
-//         type: 'POST',
-//         url: '/send_comment/' + sendcommentId + '/',
-//         data: formData,
-//         processData: false,
-//         contentType: false,
-//         success: function() {  
-//             localStorage.setItem("popupScrollPosition_cmt", popupScrollPosition_cmt); 
-//             localStorage.setItem("sendcommentId", sendcommentId);
-//             setTimeout(function() {
-//                 location.reload();
-//             }, 50);
-//         }
-//     });
-// });
-
 $(document).ready(function() {
     var popupScrollPosition_cmt = localStorage.getItem("popupScrollPosition_cmt"); 
     var sendcommentId = localStorage.getItem("sendcommentId"); 
@@ -821,7 +793,6 @@ $(document).on('submit', '#send-comment', function(e) {
         processData: false,
         contentType: false,
         success: function(data) {
-            var comment_user = data.comment_user;
             var user = data.user;
             var comment_user_username = data.comment_user_username; 
             var comment_massage = data.comment_massage;
@@ -830,8 +801,9 @@ $(document).on('submit', '#send-comment', function(e) {
             var profile_url = data.profile_url;
             var avatar_url = data.avatar_url;
             console.log('ajax0:',comment_id);
+            var hasCommentImage = comment_massage_image && comment_massage_image.trim() !== '';
             var comment_imageHTML = '';
-                if (comment_massage_image) {
+                if (hasCommentImage) {
                     comment_imageHTML = ` 
                                             <div class="dropdown-image">
                                                 <img src="`+comment_massage_image+`" width="150" height="100">
@@ -841,9 +813,9 @@ $(document).on('submit', '#send-comment', function(e) {
                                                 </div>
                                             </div>
                                         `
-                } ; 
+                }; 
             var dropbox ='';
-                if (comment_user=user) {
+                if (comment_user_username===user) {
                     dropbox = `<a href="#" onclick="deleteComment('`+comment_id+`')" >del_comment</a>`;
                 };
 
@@ -864,21 +836,21 @@ $(document).on('submit', '#send-comment', function(e) {
                                                     <div class="dropdown">
                                                         <span onclick="myFunction('`+comment_id+`')" class="dropbtn"><i class="fas fa-ellipsis-v"></i></span>
                                                         <div id="myDropdown-`+comment_id+`" class="dropdown-content dropdown-`+comment_id+`">
-                                                           
+                                                            `+dropbox+`                                                    
                                                             <a>Modify</a>
                                                             <a>report comment</a>
                                                         </div>
                                                     </div> 
                                                 </div>
                                             </div>
-                                    `
-                NewCommentHTML +=   `       <div>
-                                                `+comment_imageHTML+`
-                                            </div>
-                                            
                                         </div>
                                     `
-
+            if (hasCommentImage) {
+                NewCommentHTML += `
+                                    <div>
+                                        ${comment_imageHTML}
+                                    </div>
+                                `;}
                 NewCommentHTML +=   `   
                                         <div>
                                             <button class="mode-font-rep" data-repply-form="`+ comment_id +`">Phản hồi</button>
@@ -908,8 +880,10 @@ $(document).on('submit', '#send-comment', function(e) {
                                     <br>
                                     `
             var newComment = $(NewCommentHTML);
-            $("#comment-section").prepend(newComment);  
-
+            $("#comment-section-" + sendcommentId).prepend(newComment);  
+            
+            form.find('input[name="message"]').val('');
+            $("#massage_image").val('');
 
             $(document).on('submit', 'form[id^="repply-form-"]', function(e) {
                 e.preventDefault();
@@ -933,8 +907,9 @@ $(document).on('submit', '#send-comment', function(e) {
                     var repply_rep_mess_image = data.repply_rep_mess_image;
                     var profile_url_repply = data.profile_url_repply;
                     var avatar_url_rp = data.avatar_url_rp;
+                    var hasRepplyCommentImage = repply_rep_mess_image && repply_rep_mess_image.trim() !== '';
                     var repply_comment_imageHTML = '';
-                        if (repply_rep_mess_image) {repply_comment_imageHTML =  `<img src="{{ rep_comment.rep_mess_image.url }}" width="100" height="100"`};
+                        if (hasRepplyCommentImage) {repply_comment_imageHTML =  `<img src="` + repply_rep_mess_image +`" width="100" height="100"`};
 
                     var NewRepplyCommentHTML=   `   
                                                     <div class="comment-cad-repply"> 
@@ -943,12 +918,15 @@ $(document).on('submit', '#send-comment', function(e) {
                                                             <img class="img12" src="`+avatar_url_rp+`">
                                                         </div>
                                                         <a href="` + profile_url_repply +`">`+repply_user_username+`</a>
-                                                        <a class="formatted-text">`+repply_rep_message+`</a>   
+                                                        <a class="formatted-text">`+repply_rep_message+`</a>
+                                                `
+                    if (hasRepplyCommentImage){                      
+                        NewRepplyCommentHTML += `   
                                                         <div>
                                                             ` + repply_comment_imageHTML +`
                                                         </div>                           
                                                     </div>                                                   
-                                                `
+                                                `};  
                 var newrepplyComment = $(NewRepplyCommentHTML);
                 $("#repply-section-" + comment_id).append(newrepplyComment);
 
