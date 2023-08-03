@@ -402,28 +402,44 @@
                                         <div class="dropdown">
                                             <span onclick="myFunction('{{ comment.id }}')" class="dropbtn"><i class="fas fa-ellipsis-v"></i></span>
                                             <div id="myDropdown-{{ comment.id }}" class="dropdown-content dropdown-{{ comment.id }}">
-                                                {% if comment.comment_user == request.user %}
-                                                <a href="{% url 'del_comment' comment.id %}" onclick="deleteComment('{{ comment.id }}')" >del_comment</a>
-                                                {% endif %}
-                                                <a>Modify</a>
-                                                <a>report comment</a>
+                                                <div class="button-group-vertical">
+                                                    {% if comment.comment_user == request.user %}
+                                                        <form action="{% url 'del_comment' 0 %}" method="post" id="del_comments" data-del-id="{{ comment.id }}">
+                                                            {% csrf_token %}
+                                                            <button type="submit">Xóa bình luận</button>
+                                                        </form>
+                                                        <form action="#" method="post">
+                                                            {% csrf_token %}
+                                                            <button type="submit">Chỉnh sửa</button>
+                                                        </form>                                               
+                                                    {% else %}
+                                                        <form action="#" method="post">
+                                                            {% csrf_token %}
+                                                            <button type="submit">Ẩn bình luận</button>
+                                                        </form>
+                                                        <form action="#" method="post">
+                                                            {% csrf_token %}
+                                                            <button type="submit">Báo cáo</button>
+                                                        </form>
+                                                    {% endif %}
+                                                </div>
                                             </div>
                                         </div> 
                                     </div>
-                                    <div>
-                                        {% if comment.massage_image %}
-                                            <div class="dropdown-image">
-                                                <img src="{{ comment.massage_image.url }}" width="150" height="100">
-                                                <div class="dropdown-content-image">
-                                                    {% if comment.massage_image %}
-                                                        <img src="{{ comment.massage_image.url }}" width="500" height="400">
-                                                    {% endif %}                                                    
-                                                    <div class="desc">Cinque Terre Unique</div>
-                                                </div>
-                                            </div>
-                                        {% endif %}
-                                    </div>
                                 </div>
+                            </div>
+                            <div>
+                                {% if comment.massage_image %}
+                                    <div class="dropdown-image">
+                                        <img src="{{ comment.massage_image.url }}" width="150" height="100">
+                                        <div class="dropdown-content-image">
+                                            {% if comment.massage_image %}
+                                                <img src="{{ comment.massage_image.url }}" width="500" height="400">
+                                            {% endif %}                                                    
+                                            <div class="desc">Cinque Terre Unique</div>
+                                        </div>
+                                    </div>
+                                {% endif %}
                             </div>
                             <div>
                                 <button class="mode-font-rep" data-repply-form="{{ comment.id }}">Phản hồi</button>  
@@ -816,10 +832,20 @@ $(document).on('submit', '#send-comment', function(e) {
                 }; 
             var dropbox ='';
                 if (comment_user_username===user) {
-                    dropbox = `<a href="#" onclick="deleteComment('`+comment_id+`')" >del_comment</a>`;
+                    dropbox = ` <div class="button-group-vertical">
+                                    <form action="{% url 'del_comment' 0 %}" method="post" id="del_comments" data-del-id="`+comment_id+`">
+                                        {% csrf_token %}
+                                        <button type="submit">Xóa bình luận</button>
+                                    </form>
+                                    <form action="#" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit">Chỉnh sửa</button>
+                                    </form>
+                                </div>
+                            `
                 };
 
-            var NewCommentHTML =`   <div class="hello">
+            var NewCommentHTML =`   <div class="hello" id="delete-comment-`+comment_id+`">
                                         <div class="comment-avatar">
                                             <div>
                                                 <a href="`+profile_url+`">
@@ -836,9 +862,7 @@ $(document).on('submit', '#send-comment', function(e) {
                                                     <div class="dropdown">
                                                         <span onclick="myFunction('`+comment_id+`')" class="dropbtn"><i class="fas fa-ellipsis-v"></i></span>
                                                         <div id="myDropdown-`+comment_id+`" class="dropdown-content dropdown-`+comment_id+`">
-                                                            `+dropbox+`                                                    
-                                                            <a>Modify</a>
-                                                            <a>report comment</a>
+                                                            `+dropbox+`
                                                         </div>
                                                     </div> 
                                                 </div>
@@ -846,20 +870,20 @@ $(document).on('submit', '#send-comment', function(e) {
                                         </div>
                                     `
             if (hasCommentImage) {
-                NewCommentHTML += `
-                                    <div>
-                                        ${comment_imageHTML}
-                                    </div>
-                                `;}
+                NewCommentHTML +=   `
+                                        <div>
+                                            ${comment_imageHTML}
+                                        </div>
+                                    `         ;}
                 NewCommentHTML +=   `   
                                         <div>
-                                            <button class="mode-font-rep" data-repply-form="`+ comment_id +`">Phản hồi</button>
+                                            <button class="mode-font-rep-js" data-repply-form1="`+ comment_id +`">Phản hồi</button>
                                             <button class="mode-font-like">Like</button> 
                                         </div>
                                     `
                 NewCommentHTML +=   `
                                         <div class="message-form">
-                                            <form action="{% url 'repply_comment' 0 %}" method="post" data-comment-id="`+comment_id+`" id="repply-form-`+comment_id+`" enctype="multipart/form-data" style ="display: none;">  
+                                            <form action="{% url 'repply_comment' 0 %}" method="post" data-comment-id="`+comment_id+`" id="repply-form1-`+comment_id+`" enctype="multipart/form-data" style ="display: none;">  
                                                 {% csrf_token %}
                                                 <div class="form-row">
                                                     <input type="text" name="rep_message" placeholder="Type your message">
@@ -885,8 +909,9 @@ $(document).on('submit', '#send-comment', function(e) {
             form.find('input[name="message"]').val('');
             $("#massage_image").val('');
 
-            $(document).on('submit', 'form[id^="repply-form-"]', function(e) {
+            $(document).on('submit', 'form[id^="repply-form1-"]', function(e) {
                 e.preventDefault();
+                var form = $(this);
                 var comment_id = form.data('comment-id');
                 console.log('ajax:',comment_id)
                 var rep_message = form.find('input[name="rep_message"]').val();
@@ -954,69 +979,64 @@ $(document).on('submit', '#send-comment', function(e) {
                     },    
             });
             })
-
-            $(document).on("click", ".mode-font-rep", function(event) {
-                event.preventDefault();
-                var commentId = $(this).data("repply-form");
-                toggleRepplyForm(event, "repply-form-" + commentId);
-                });
-            function toggleRepplyForm(event, repply_formId) {
-                event.preventDefault();
-                var formDiv = document.getElementById(repply_formId);
-                formDiv.style.display = formDiv.style.display === "none" ? "block" : "none";
-                }
             });
-    } 
-});
+        } 
+    });
 });
 
 
 $(document).on('submit', 'form[id^="repply-form-"]', function(e) {
-                e.preventDefault();
-                var comment_id = form.data('comment-id');
-                console.log('ajax:',comment_id)
-                var rep_message = form.find('input[name="rep_message"]').val();
-                var rep_mess_image = form.find('input[name="rep_mess_image"]').prop('files')[0];
-                var formData = new FormData(this); 
-                formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
-            $.ajax({
-                type: 'POST',
-                url: '/repply_comment/' + comment_id + '/',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(data) {
-                    var repply_id = data.repply_id;
-                    var repply_user_username = data.repply_user_username;
-                    var repply_user_id = data.repply_user_id;
-                    var repply_rep_message = data.repply_rep_message;
-                    var repply_rep_mess_image = data.repply_rep_mess_image;
-                    var profile_url_repply = data.profile_url_repply;
-                    var avatar_url_rp = data.avatar_url_rp;
-                    var repply_comment_imageHTML = '';
-                        if (repply_rep_mess_image) {repply_comment_imageHTML =  `<img src="{{ rep_comment.rep_mess_image.url }}" width="100" height="100"`};
+    e.preventDefault();
+    var form = $(this);
+    var comment_id = form.data('comment-id');
+    console.log('ajax:',comment_id)
+    var rep_message = form.find('input[name="rep_message"]').val();
+    var rep_mess_image = form.find('input[name="rep_mess_image"]').prop('files')[0];
+    var formData = new FormData(this); 
+    formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+    $.ajax({
+        type: 'POST',
+        url: '/repply_comment/' + comment_id + '/',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(data) {
+            var repply_id = data.repply_id;
+            var repply_user_username = data.repply_user_username;
+            var repply_user_id = data.repply_user_id;
+            var repply_rep_message = data.repply_rep_message;
+            var repply_rep_mess_image = data.repply_rep_mess_image;
+            var profile_url_repply = data.profile_url_repply;
+            var avatar_url_rp = data.avatar_url_rp;
+            var hasRepplyCommentImage = repply_rep_mess_image && repply_rep_mess_image.trim() !== '';
+            var repply_comment_imageHTML = '';
+                if (hasRepplyCommentImage) {repply_comment_imageHTML =  `<img src="` + repply_rep_mess_image +`" width="100" height="100"`};
 
-                    var NewRepplyCommentHTML=   `   
-                                                    <div class="comment-cad-repply"> 
-                                                        <div>
-                                                            <a href="`+profile_url_repply+`">
-                                                            <img class="img12" src="`+avatar_url_rp+`">
-                                                        </div>
-                                                        <a href="` + profile_url_repply +`">`+repply_user_username+`</a>
-                                                        <a class="formatted-text">`+repply_rep_message+`</a>   
-                                                        <div>
-                                                            ` + repply_comment_imageHTML +`
-                                                        </div>                           
-                                                    </div>                                                   
-                                                `
-                var newrepplyComment = $(NewRepplyCommentHTML);
-                $("#repply-section-" + comment_id).append(newrepplyComment);
+            var NewRepplyCommentHTML=   `   
+                                            <div class="comment-cad-repply"> 
+                                                <div>
+                                                    <a href="`+profile_url_repply+`">
+                                                    <img class="img12" src="`+avatar_url_rp+`">
+                                                </div>
+                                                <a href="` + profile_url_repply +`">`+repply_user_username+`</a>
+                                                <a class="formatted-text">`+repply_rep_message+`</a>
+                                        `
+            if (hasRepplyCommentImage){                      
+                NewRepplyCommentHTML += `   
+                                                <div>
+                                                    ` + repply_comment_imageHTML +`
+                                                </div>                           
+                                            </div>                                                   
+                                        `};
+            var newrepplyComment = $(NewRepplyCommentHTML);
+            $("#repply-section-" + comment_id).append(newrepplyComment);
 
-                },
-                error: function(error) {
-                }
-            });
+            },
+            error: function(error) {
+            }
+    });
 });
+
 $(document).on('submit', '#del_comments', function(e) {
     e.preventDefault();
     var form = $(this);
@@ -1048,6 +1068,15 @@ function toggleRepplyForm(event, repply_formId) {
   formDiv.style.display = formDiv.style.display === "none" ? "block" : "none";
 }
 
+$(document).on('click', '.mode-font-rep-js', function() {
+    var commentId = $(this).data('repply-form1');
+    var messageForm = $('#repply-form1-' + commentId);
+    if (messageForm.css('display') === 'none') {
+        messageForm.show();
+    } else {
+        messageForm.hide();
+    }
+});
 
 </script> 
 

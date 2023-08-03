@@ -194,8 +194,6 @@ def del_comment(request,pk):
     del_comment_id = CommentViews.objects.get(pk=pk)
     if request.method == 'POST':
         del_comment_id.delete()
-        id = del_comment_id.post_comment_id
-        id_post = PostViews.objects.get(pk=id)
         commit = True
         print(commit) 
     return JsonResponse({'commit':commit})
@@ -209,8 +207,9 @@ def repply_comment(request,pk):
             rep_mess_image = request.FILES.get('rep_mess_image')
             repply_all = Repply_commentviews.objects.create(user_rep=request.user,rep_commentviews=comment_id,rep_message=rep_message,rep_mess_image=rep_mess_image)
             repply_all.save()
+            avatar_url_rp = repply_all.get_repply_comment_user_avatar().url if repply_all.get_repply_comment_user_avatar() else '/media/images/default_avatar.jpg'
             new_repppy_cmt = {
-                'avatar_url_rp': repply_all.get_repply_comment_user_avatar.url,
+                'avatar_url_rp': avatar_url_rp,
                 'repply_id':repply_all.id,
                 'profile_url_repply': f'/post_profile/{repply_all.user_rep_id}/',
                 'repply_user_username':repply_all.user_rep.username,
