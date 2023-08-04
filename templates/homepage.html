@@ -79,9 +79,9 @@
                         <div class="datesince">
                             <div class="three_dot_post_dropdown">
                                 <a href="{% url 'post_profile' post.post_user_id %}">{{ post.post_user }}</a>
-                                <div class="dropdown1">
-                                    <i class="fas fa-ellipsis-h dropdown1-btn1" data-post-id="{{ post.id }}"></i>
-                                    <div class="dropdown1-content1 dropdown1-content1-{{ post.id }}">
+                                <div class="dropdown_post">
+                                    <i class="fas fa-ellipsis-h dropdown_post-btn1" data-post-id="{{ post.id }}"></i>
+                                    <div class="dropdown_post-content1 dropdown_post-content1-{{ post.id }}">
                                         <a href="#">Lưu bài viết của {{post.post_user}}<i class="far fa-bookmark"></i></a>
                                         <a href="#">Báo cáo bài viết <i class="fas fa-flag"></i></a>
                                         <a href="#">Ẩn bài viết của {{post.post_user}}<i class="far fa-eye-slash"></i></a>
@@ -385,7 +385,7 @@
                             <!-- commmet will put on here -->
                         </div>   
                         {% for comment in post.commentviews_set.all %}
-                        <div class="hello" id="delete-comment-{{ comment.id }}">
+                        <div class="comment_section_component" id="delete-comment-{{ comment.id }}">
                             <div class="comment-avatar">
                                 <div>
                                     <a href="{% url 'post_profile' comment.comment_user_id %}">
@@ -399,9 +399,9 @@
                                             </div>
                                             <small class="formatted-text">{{ comment.message }}</small>
                                         </div>
-                                        <div class="dropdown">
-                                            <span onclick="myFunction('{{ comment.id }}')" class="dropbtn"><i class="fas fa-ellipsis-v"></i></span>
-                                            <div id="myDropdown-{{ comment.id }}" class="dropdown-content dropdown-{{ comment.id }}">
+                                        <div class="dropdown_comment">
+                                            <span onclick="myFunction('{{ comment.id }}')" class="dropbtn_comment"><i class="fas fa-ellipsis-v"></i></span>
+                                            <div id="myDropdown-{{ comment.id }}" class="dropdown-content_comment dropdown_comment-{{ comment.id }}">
                                                 <div class="button-group-vertical">
                                                     {% if comment.comment_user == request.user %}
                                                         <form action="{% url 'del_comment' 0 %}" method="post" id="del_comments" data-del-id="{{ comment.id }}">
@@ -466,14 +466,62 @@
                             <div>
                                 {% if comment.repply_commentviews_set.all %}
                                     {% for rep_comment in comment.repply_commentviews_set.all %}
-                                        <div class="comment-cad-repply"> 
-                                            <h5><a href=" {% url 'post_profile' rep_comment.user_rep_id %}">@{{ rep_comment.user_rep.username }}</a></h5>
-                                            <a class="formatted-text">{{ rep_comment.rep_message }}</a>   
+                                        <div class="repply_section_component">
+                                            <div class="comment-avatar">
+                                                <div>
+                                                    <a href="{% url 'post_profile' rep_comment.user_rep_id %}">
+                                                    <img class="img12" src="{{ rep_comment.get_repply_comment_user_avatar.url }}">
+                                                </div>
+                                                <div class="comment-card1">
+                                                    <div class="dua_len_ngang_hang_va_dieu_chinh_khoang_cach">
+                                                        <div id="rep_comment-{{ rep_comment.id }}">                                           
+                                                            <div class="txt">
+                                                                <a href="{% url 'post_profile' rep_comment.user_rep_id %}">{{rep_comment.user_rep.username}}</a>
+                                                            </div>
+                                                            <small class="formatted-text">{{ rep_comment.rep_message }}</small>
+                                                        </div>
+                                                        <div class="dropdown_rep">
+                                                            <span onclick="Repply_component('{{ rep_comment.id }}')" class="dropbtn_rep"><i class="fas fa-ellipsis-v"></i></span>
+                                                            <div id="repply_dropdown-{{ rep_comment.id }}" class="dropdown-content_rep dropdown_rep-{{ rep_comment.id }}">
+                                                              <div class="button-group-vertical">
+                                                                {% if rep_comment.user_rep == request.user %}
+                                                                    <form action="#" method="post" id="del_repply" data-del-rep-id="{{ rep_comment.id }}">
+                                                                        {% csrf_token %}
+                                                                        <button type="submit">Xóa bình luận</button>
+                                                                    </form>
+                                                                    <form action="#" method="post">
+                                                                        {% csrf_token %}
+                                                                        <button type="submit">Chỉnh sửa</button>
+                                                                    </form>                                               
+                                                                {% else %}
+                                                                    <form action="#" method="post">
+                                                                        {% csrf_token %}
+                                                                        <button type="submit">Ẩn bình luận</button>
+                                                                    </form>
+                                                                    <form action="#" method="post">
+                                                                        {% csrf_token %}
+                                                                        <button type="submit">Báo cáo</button>
+                                                                    </form>
+                                                                {% endif %}
+                                                              </div>
+                                                            </div>
+                                                        </div> 
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div>
                                                 {% if rep_comment.rep_mess_image %}
-                                                    <h1><img src="{{ rep_comment.rep_mess_image.url }}" width="100" height="100"></h1>
+                                                    <div class="dropdown-image">
+                                                        <img src="{{ rep_comment.rep_mess_image.url }}" width="150" height="100">
+                                                        <div class="dropdown-content-image">
+                                                            {% if rep_comment.rep_mess_image %}
+                                                                <img src="{{ rep_comment.rep_mess_image.url }}" width="500" height="400">
+                                                            {% endif %}                                                    
+                                                            <div class="desc">Cinque Terre Unique</div>
+                                                        </div>
+                                                    </div>
                                                 {% endif %}
-                                            </div>                           
+                                            </div>
                                         </div>
                                     {% endfor %}
                                 {% endif %}
@@ -676,13 +724,8 @@ function searchUser() {
             var resultsHTML = ""; 
             resultsHTML += "<br><li>Kết quả tìm kiếm: </li><br>"
             for (var i = 0; i < data.length; i++) {
-                
-                // resultsHTML += '<div class="info-search"> <img class="img12345" src="' + data[i].avatar + '">  <a class="testjs" href="' + data[i].profile_url + '">' + data[i].username + '</a> </div> <br>';
                 resultsHTML += '<div class="info-search"> <a href="'+ data[i].profile_url +'"> <img class="img12345" src="' + data[i].avatar + '"></a>  <a class="testjs" href="' + data[i].profile_url + '">' + data[i].username + '</a> </div> <br>';
-            }
-            
-                
-            
+            }            
             searchResultsDiv.innerHTML = resultsHTML; 
         },
         error: function() {
@@ -768,19 +811,19 @@ for (let i = 0; i < posts.length; i++) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-      const dropdownBtns = document.querySelectorAll(".dropdown1-btn1");
+      const dropdownBtns = document.querySelectorAll(".dropdown_post-btn1");
 
       dropdownBtns.forEach(function(btn) {
         btn.addEventListener("click", function() {
           const postId = this.dataset.postId;
-          const dropdownContent = document.querySelector(`.dropdown1-content1-${postId}`);
+          const dropdownContent = document.querySelector(`.dropdown_post-content1-${postId}`);
           dropdownContent.classList.toggle("show1");
         });
       });
 
       window.addEventListener("click", function(event) {
-        if (!event.target.matches(".dropdown1-btn1")) {
-          const dropdownContents = document.querySelectorAll(".dropdown1-content1");
+        if (!event.target.matches(".dropdown_post-btn1")) {
+          const dropdownContents = document.querySelectorAll(".dropdown_post-content1");
           dropdownContents.forEach(function(content) {
             if (content.classList.contains("show1")) {
               content.classList.remove("show1");
@@ -845,7 +888,7 @@ $(document).on('submit', '#send-comment', function(e) {
                             `
                 };
 
-            var NewCommentHTML =`   <div class="hello" id="delete-comment-`+comment_id+`">
+            var NewCommentHTML =`   <div class="comment_section_component" id="delete-comment-`+comment_id+`">
                                         <div class="comment-avatar">
                                             <div>
                                                 <a href="`+profile_url+`">
@@ -933,27 +976,73 @@ $(document).on('submit', '#send-comment', function(e) {
                     var profile_url_repply = data.profile_url_repply;
                     var avatar_url_rp = data.avatar_url_rp;
                     var hasRepplyCommentImage = repply_rep_mess_image && repply_rep_mess_image.trim() !== '';
+                    var hasRepplyCommentImage = repply_rep_mess_image && repply_rep_mess_image.trim() !== '';
                     var repply_comment_imageHTML = '';
-                        if (hasRepplyCommentImage) {repply_comment_imageHTML =  `<img src="` + repply_rep_mess_image +`" width="100" height="100"`};
-
-                    var NewRepplyCommentHTML=   `   
-                                                    <div class="comment-cad-repply"> 
-                                                        <div>
-                                                            <a href="`+profile_url_repply+`">
-                                                            <img class="img12" src="`+avatar_url_rp+`">
+                        if (hasRepplyCommentImage) 
+                        {repply_comment_imageHTML = `
+                                                        <img src="` + repply_rep_mess_image +`" width="150" height="100">
+                                                        <div class="dropdown-content-image">
+                                                            <img src="` + repply_rep_mess_image +`" width="500" height="400">                                               
+                                                            <div class="desc">Cinque Terre Unique</div>
                                                         </div>
-                                                        <a href="` + profile_url_repply +`">`+repply_user_username+`</a>
-                                                        <a class="formatted-text">`+repply_rep_message+`</a>
+                                                    `   };
+
+                    var NewRepplyCommentHTML=   `   <div class="repply_section_component">
+                                                        <div class="comment-avatar">
+                                                            <div>
+                                                                <a href="`+profile_url_repply+`">
+                                                                <img class="img12" src="`+avatar_url_rp+`">
+                                                            </div>
+                                                            <div class="comment-card1">
+                                                                <div class="dua_len_ngang_hang_va_dieu_chinh_khoang_cach">
+                                                                    <div id="rep_comment-`+repply_id+`">                                           
+                                                                        <div class="txt">
+                                                                            <a href="` + profile_url_repply +`">`+repply_user_username+`</a>
+                                                                        </div>
+                                                                        <small class="formatted-text">`+repply_rep_message+`</small>
+                                                                    </div>
+                                                                    <div class="dropdown_rep">
+                                                                        <span onclick="Repply_component('`+repply_id+`')" class="dropbtn_rep"><i class="fas fa-ellipsis-v"></i></span>
+                                                                        <div id="repply_dropdown-`+repply_id+`" class="dropdown-content_rep dropdown_rep-`+repply_id+`">
+                                                                        <div class="button-group-vertical">
+                                                                            {% if rep_comment.user_rep == request.user %}
+                                                                                <form action="#" method="post" id="del_repply" data-del-rep-id="`+repply_id+`">
+                                                                                    {% csrf_token %}
+                                                                                    <button type="submit">Xóa bình luận</button>
+                                                                                </form>
+                                                                                <form action="#" method="post">
+                                                                                    {% csrf_token %}
+                                                                                    <button type="submit">Chỉnh sửa</button>
+                                                                                </form>                                               
+                                                                            {% else %}
+                                                                                <form action="#" method="post">
+                                                                                    {% csrf_token %}
+                                                                                    <button type="submit">Ẩn bình luận</button>
+                                                                                </form>
+                                                                                <form action="#" method="post">
+                                                                                    {% csrf_token %}
+                                                                                    <button type="submit">Báo cáo</button>
+                                                                                </form>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                        </div>
+                                                                    </div> 
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                 `
                     if (hasRepplyCommentImage){                      
                         NewRepplyCommentHTML += `   
-                                                        <div>
+                                                        <div class="dropdown-image">
                                                             ` + repply_comment_imageHTML +`
-                                                        </div>                           
+                                                        </div>                          
                                                     </div>                                                   
-                                                `};  
-                var newrepplyComment = $(NewRepplyCommentHTML);
-                $("#repply-section-" + comment_id).append(newrepplyComment);
+                                                `};
+                    var newrepplyComment = $(NewRepplyCommentHTML);
+                    $("#repply-section-" + comment_id).append(newrepplyComment);
+
+                    form.find('input[name="rep_message"]').val('');
+                    $("#rep_mess_image").val('');
 
                 },
                 error: function(error) {
@@ -992,7 +1081,9 @@ $(document).on('submit', 'form[id^="repply-form-"]', function(e) {
     console.log('ajax:',comment_id)
     var rep_message = form.find('input[name="rep_message"]').val();
     var rep_mess_image = form.find('input[name="rep_mess_image"]').prop('files')[0];
-    var formData = new FormData(this); 
+    var formData = new FormData(); 
+    formData.append('rep_message', rep_message);
+    formData.append('rep_mess_image', rep_mess_image);
     formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
     $.ajax({
         type: 'POST',
@@ -1010,30 +1101,72 @@ $(document).on('submit', 'form[id^="repply-form-"]', function(e) {
             var avatar_url_rp = data.avatar_url_rp;
             var hasRepplyCommentImage = repply_rep_mess_image && repply_rep_mess_image.trim() !== '';
             var repply_comment_imageHTML = '';
-                if (hasRepplyCommentImage) {repply_comment_imageHTML =  `<img src="` + repply_rep_mess_image +`" width="100" height="100"`};
-
-            var NewRepplyCommentHTML=   `   
-                                            <div class="comment-cad-repply"> 
-                                                <div>
-                                                    <a href="`+profile_url_repply+`">
-                                                    <img class="img12" src="`+avatar_url_rp+`">
+                if (hasRepplyCommentImage) 
+                {repply_comment_imageHTML = `
+                                                <img src="` + repply_rep_mess_image +`" width="150" height="100">
+                                                <div class="dropdown-content-image">
+                                                    <img src="` + repply_rep_mess_image +`" width="500" height="400">                                               
+                                                    <div class="desc">Cinque Terre Unique</div>
                                                 </div>
-                                                <a href="` + profile_url_repply +`">`+repply_user_username+`</a>
-                                                <a class="formatted-text">`+repply_rep_message+`</a>
+                                            `   };
+
+            var NewRepplyCommentHTML=   `   <div class="repply_section_component">
+                                                <div class="comment-avatar">
+                                                    <div>
+                                                        <a href="`+profile_url_repply+`">
+                                                        <img class="img12" src="`+avatar_url_rp+`">
+                                                    </div>
+                                                    <div class="comment-card1">
+                                                        <div class="dua_len_ngang_hang_va_dieu_chinh_khoang_cach">
+                                                            <div id="rep_comment-`+repply_id+`">                                           
+                                                                <div class="txt">
+                                                                    <a href="` + profile_url_repply +`">`+repply_user_username+`</a>
+                                                                </div>
+                                                                <small class="formatted-text">`+repply_rep_message+`</small>
+                                                            </div>
+                                                            <div class="dropdown_rep">
+                                                                <span onclick="Repply_component('`+repply_id+`')" class="dropbtn_rep"><i class="fas fa-ellipsis-v"></i></span>
+                                                                <div id="repply_dropdown-`+repply_id+`" class="dropdown-content_rep dropdown_rep-`+repply_id+`">
+                                                                <div class="button-group-vertical">
+                                                                    {% if rep_comment.user_rep == request.user %}
+                                                                        <form action="#" method="post" id="del_repply" data-del-rep-id="`+repply_id+`">
+                                                                            {% csrf_token %}
+                                                                            <button type="submit">Xóa bình luận</button>
+                                                                        </form>
+                                                                        <form action="#" method="post">
+                                                                            {% csrf_token %}
+                                                                            <button type="submit">Chỉnh sửa</button>
+                                                                        </form>                                               
+                                                                    {% else %}
+                                                                        <form action="#" method="post">
+                                                                            {% csrf_token %}
+                                                                            <button type="submit">Ẩn bình luận</button>
+                                                                        </form>
+                                                                        <form action="#" method="post">
+                                                                            {% csrf_token %}
+                                                                            <button type="submit">Báo cáo</button>
+                                                                        </form>
+                                                                    {% endif %}
+                                                                </div>
+                                                                </div>
+                                                            </div> 
+                                                        </div>
+                                                    </div>
+                                                </div>
                                         `
             if (hasRepplyCommentImage){                      
                 NewRepplyCommentHTML += `   
-                                                <div>
+                                                <div class="dropdown-image">
                                                     ` + repply_comment_imageHTML +`
-                                                </div>                           
+                                                </div>                          
                                             </div>                                                   
                                         `};
             var newrepplyComment = $(NewRepplyCommentHTML);
             $("#repply-section-" + comment_id).append(newrepplyComment);
 
-            },
-            error: function(error) {
-            }
+        },
+        error: function(error) {
+        }
     });
 });
 

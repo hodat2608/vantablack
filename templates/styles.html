@@ -336,7 +336,7 @@ ul {
   max-width: 100%;
   display: inline-block;
 }
-.hello {
+.comment_section_component {
   border: none;
   border-radius: 5px;
   padding: 10px;
@@ -345,16 +345,39 @@ ul {
   max-width: 100%;
   display: inline-block;
 }
-.hello h1 {
+.comment_section_component h1 {
   margin-top: 0;
 }
-.hello img {
+.comment_section_component img {
   border-radius: 50%;
   border: #000000;
 }
-.hello:last-child {
+.comment_section_component:last-child {
   margin-bottom: 0; 
 }
+
+.repply_section_component {
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 0;
+  margin-left: 40px;
+  width: auto;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.repply_section_component h1 {
+  margin-top: 0;
+}
+.repply_section_component img {
+  border-radius: 50%;
+  border: #000000;
+}
+.repply_section_component:last-child {
+  margin-bottom: 0; 
+}
+
 .comment-cad h5 {
   margin-bottom: 10px;
   text-align: left;
@@ -492,7 +515,7 @@ ul {
   outline: none;
 }
 
-.dropbtn {
+.dropbtn_comment {
   background-color: #f2f1f1;
   color: rgb(0, 0, 0);
   padding: 14px;
@@ -501,18 +524,18 @@ ul {
   cursor: pointer;
 }
 
-.dropbtn:hover, .dropbtn:focus {
+.dropbtn_comment:hover, .dropbtn_comment:focus {
     background-color: #f2f1f1;
     border-radius: 30%;
 }
 
-.dropdown {
+.dropdown_comment {
   position: relative;
   display: inline-block;
   border-radius: 10px;
 }
 
-.dropdown-content {
+.dropdown-content_comment {
   display: none;
   position: absolute;
   background-color: #f2f1f1;
@@ -523,16 +546,17 @@ ul {
   border-radius: 12px;
 }
 
-.dropdown-content a {
+.dropdown-content_comment a {
   color: black;
   padding: 12px 16px;
   text-decoration: none;
   display: block;
 }
 
-.dropdown a:hover {background-color: #f2f1f1;}
+.dropdown_comment a:hover {background-color: #f2f1f1;}
 
 .show {display: block;}
+
 
 .dua_len_ngang_hang_va_dieu_chinh_khoang_cach {
   display: flex;
@@ -986,6 +1010,10 @@ a{
 .dropdown-image {
   position: relative;
   display: inline-block;
+  margin-left: 40px;
+}
+.dropdown-image img{
+  border-radius: 15px;
 }
 
 .dropdown-content-image {
@@ -1065,18 +1093,18 @@ a{
   overflow-y: auto; 
 }
 
-.dropdown1 {
+.dropdown_post {
   position: relative;
   display: inline-block;
   z-index: 1;
  
 }
-.dropdown1-btn1 {
+.dropdown_post-btn1 {
   cursor: pointer;
   margin-left: 385px;
   z-index: 1;
 }
-.dropdown1-content1 {
+.dropdown_post-content1 {
   display: none;
   position: absolute;
   background-color: #f9f9f9;
@@ -1090,7 +1118,7 @@ a{
   margin-left: 130px;
   z-index: 1;
 }
-.dropdown1-content1 a {
+.dropdown_post-content1 a {
   display: block;
   padding: 15px 10px;
   font-family: Arial, Helvetica, sans-serif;
@@ -1100,11 +1128,11 @@ a{
   color: #333;
   z-index: 1;
 }
-.dropdown1-content1 a i {
+.dropdown_post-content1 a i {
       margin-left: 10px; 
       z-index: 1;
     }
-.dropdown1-content1 a:hover {
+.dropdown_post-content1 a:hover {
   background-color: #f1f1f1;
   z-index: 1;
 }
@@ -1133,6 +1161,50 @@ a{
 .button-group-vertical button:hover {
   background-color: #e1e1e1;
 }
+
+
+.dropbtn_rep {
+  background-color: #f2f1f1;
+  color: rgb(0, 0, 0);
+  padding: 14px;
+  font-size: 10px;
+  border: none;
+  cursor: pointer;
+}
+  
+.dropbtn_rep:hover, .dropbtn_rep:focus {
+  background-color: #f2f1f1;
+  border-radius: 30%;
+}
+  
+.dropdown_rep {
+  position: relative;
+  display: inline-block;
+  border-radius: 10px;
+}
+  
+.dropdown-content_rep {
+  display: none;
+  position: absolute;
+  background-color: #f2f1f1;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  border-radius: 12px;
+}
+  
+.dropdown-content_rep a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+  
+.dropdown_rep a:hover {background-color: #f2f1f1;}
+
+.show {display: block;}
+  
 
 
 </style>
@@ -1184,14 +1256,14 @@ function validateInput3() {
     }
 
 function toggleDropdownContent(dropdown) {
-    var dropdownContent = dropdown.querySelector(".dropdown-content");
+    var dropdownContent = dropdown.querySelector(".dropdown-content_comment");
     dropdownContent.classList.toggle("show");
 }
 document.addEventListener("click", function(event) {
-    var dropdowns = document.getElementsByClassName("dropdown");
+    var dropdowns = document.getElementsByClassName("dropdown_comment");
     Array.from(dropdowns).forEach(function(dropdown) {
-        var dropdownContent = dropdown.querySelector(".dropdown-content");
-        var dropdownBtn = dropdown.querySelector(".dropbtn");
+        var dropdownContent = dropdown.querySelector(".dropdown-content_comment");
+        var dropdownBtn = dropdown.querySelector(".dropbtn_comment");
         if (dropdownBtn.contains(event.target)) {
             toggleDropdownContent(dropdown);
         } else {
@@ -1200,7 +1272,7 @@ document.addEventListener("click", function(event) {
     });
 });
 document.addEventListener("DOMContentLoaded", function() {
-    var dropdowns = document.getElementsByClassName("dropdown");
+    var dropdowns = document.getElementsByClassName("dropdown_comment");
     Array.from(dropdowns).forEach(function(dropdown) {
         dropdown.addEventListener("click", function(event) {
             event.stopPropagation();
@@ -1209,6 +1281,24 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
+function Repply_component(rep_comment_id) {
+    var dropdownContent = document.getElementById('repply_dropdown-' + rep_comment_id);
+    if (dropdownContent.classList.contains('show')) {
+        dropdownContent.classList.remove('show');
+    } else {
+        document.querySelectorAll('.dropdown-content_rep').forEach(function(content) {
+            content.classList.remove('show');
+        });
+        dropdownContent.classList.add('show');
+    }
+}
+window.addEventListener('click', function(event) {
+    if (!event.target.matches('.dropbtn_rep')) {
+        document.querySelectorAll('.dropdown-content_rep').forEach(function(content) {
+            content.classList.remove('show');
+        });
+    }
+});
 
   </script>
 </head>
