@@ -148,7 +148,6 @@ def search_user(request):
         query = request.GET.get('query')  
         if query.strip() != '':
             search_users = User.objects.filter(username__icontains=query)
-            #result = [{'username': user.username,'avatar':user.profileuser.avatar.url, 'profile_url': f'/post_profile/{user.id}/'} for user in search_users] 
             result = []
             for user in search_users:
                 if hasattr(user, 'profileuser'):
@@ -209,10 +208,11 @@ def repply_comment(request,pk):
             repply_all.save()
             avatar_url_rp = repply_all.get_repply_comment_user_avatar().url if repply_all.get_repply_comment_user_avatar() else '/media/images/default_avatar.jpg'
             new_repppy_cmt = {
+                'user': request.user.username if request.user.is_authenticated else None,
                 'avatar_url_rp': avatar_url_rp,
                 'repply_id':repply_all.id,
                 'profile_url_repply': f'/post_profile/{repply_all.user_rep_id}/',
-                'repply_user_username':repply_all.user_rep.username,
+                'repply_user_username':repply_all.user_rep.username if repply_all.user_rep else None,
                 'repply_user_id':repply_all.user_rep.id,
                 'repply_rep_message':repply_all.rep_message,
                 'repply_rep_mess_image':repply_all.rep_mess_image.url if repply_all.rep_mess_image else " "}
@@ -220,6 +220,16 @@ def repply_comment(request,pk):
     else:
         form = repply_comment_form()
     return render(request, 'homepage.html', {'form' : form},)
+
+@login_required(login_url='user_login')
+def del_repply_comment(request,pk):
+    del_repply_id = Repply_commentviews.objects.get(pk=pk)
+    if request.method == 'POST':
+        del_repply_id.delete()
+        commit1 = True
+        print(commit1) 
+    return JsonResponse({'commit1':commit1})
+
 
 def share_post_views(request,pk):
     post_id = PostViews.objects.get(pk=pk)
@@ -236,6 +246,20 @@ def share_post_views(request,pk):
     share_user_count = post_id.post_shares.count()
     all_user_share = list(post_id.post_shares.all().values_list('username', flat=True))
     context = {'boolean':boolean,'share_user_count':share_user_count,'all_user_share':all_user_share,}
+    return JsonResponse(context)
+
+def update_post_likes(request,pk):
+    post_like_is = get_object_or_404(PostViews,pk=pk)
+    user = request.user
+    if request.method == 'POST':
+        if user in post_like_is.post_likes.all():
+            post_like_is.post_likes.remove(user)
+            update_like = False
+        else:
+            update_like = True 
+            post_like_is.post_likes.add(user)
+    update_like_count = post_like_is.post_likes.count()
+    context = {'update_like':update_like,'update_like_count':update_like_count}
     return JsonResponse(context)
             
 

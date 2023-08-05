@@ -116,9 +116,9 @@
                                         <p>.</p>
                                     {% endif %} 
                                     {% if post.post_shares.count > 0 %}
-                                        <p>{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
+                                        <p >{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
                                     {% else %}
-                                        <p>.</p>
+                                        <p id="share-count-{{ post.id }}">.</p>
                                     {% endif %} 
                                 </div>  
                             {% else %} 
@@ -132,9 +132,9 @@
                                         <p>.</p>
                                     {% endif %}
                                     {% if post.post_shares.count > 0 %}
-                                        <p>{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
+                                        <p >{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
                                     {% else %}
-                                        <p>.</p>
+                                        <p id="share-count-{{ post.id }}">.</p>
                                     {% endif %}
                                 </div>
                             {% endif %}
@@ -151,9 +151,9 @@
                                         <p>.</p>
                                     {% endif %}
                                     {% if post.post_shares.count > 0 %}
-                                        <p>{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
+                                        <p >{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
                                     {% else %}
-                                        <p>.</p>
+                                        <p id="share-count-{{ post.id }}">.</p>
                                     {% endif %}
                                 </div>
                             {% else %}
@@ -167,9 +167,9 @@
                                         <p>.</p>
                                     {% endif %}
                                     {% if post.post_shares.count > 0 %}
-                                        <p>{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
+                                        <p id="share-count-{{ post.id }}">{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
                                     {% else %}
-                                        <p>.</p>
+                                        <p id="share-count-{{ post.id }}">.</p>
                                     {% endif %}
                                 </div>
                             {% endif %}   
@@ -199,7 +199,17 @@
                         </button>
                     </form>
 
-                    <button  onclick="turnoncommentAndRefresh('{{ post.id }}')"><i class="fas fa-comment"></i> Comment</button>
+                    <!-- <button  onclick="turnoncommentAndRefresh('{{ post.id }}')"><i class="fas fa-comment"></i> Comment</button> -->
+
+                    <!-- <form action="{% url 'update_post_likes' 0 %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" onclick="toggleCommentPopupWithDelay('{{ post.id }}')"><i class="fas fa-comment"></i> Comment</button>
+                    </form> -->
+
+                    <form id="like-form" method="post">
+                        {% csrf_token %}
+                        <button type="button" onclick="toggleCommentPopupWithDelay('{{ post.id }}')"><i class="fas fa-comment"></i> Comment</button>
+                    </form>
 
                     <button type="submit" id="share-button-{{ post.id }}"> <i class="fas fa-share"></i> Share</button>
 
@@ -466,7 +476,7 @@
                             <div>
                                 {% if comment.repply_commentviews_set.all %}
                                     {% for rep_comment in comment.repply_commentviews_set.all %}
-                                        <div class="repply_section_component">
+                                        <div class="repply_section_component" id="delete-repply-{{ rep_comment.id }}">
                                             <div class="comment-avatar">
                                                 <div>
                                                     <a href="{% url 'post_profile' rep_comment.user_rep_id %}">
@@ -485,7 +495,7 @@
                                                             <div id="repply_dropdown-{{ rep_comment.id }}" class="dropdown-content_rep dropdown_rep-{{ rep_comment.id }}">
                                                               <div class="button-group-vertical">
                                                                 {% if rep_comment.user_rep == request.user %}
-                                                                    <form action="#" method="post" id="del_repply" data-del-rep-id="{{ rep_comment.id }}">
+                                                                    <form action="{% url 'del_repply_comment' 0 %}" method="post" id="del_repply" data-del-rep-id="{{ rep_comment.id }}">
                                                                         {% csrf_token %}
                                                                         <button type="submit">Xóa bình luận</button>
                                                                     </form>
@@ -652,6 +662,24 @@ function toggleCommentPopupWithDelay(postID) {
         setTimeout(function() {
             var popup = document.getElementById("comment-popup-" + postID);
             popup.style.display = "block";
+            $.ajax({
+                type: 'POST',
+                url: '/update_post_likes/' + postID + '/',
+                success: function(data) {
+                    var liked_button_section = $('#like-button-section-' + postID);
+                    var liked_count_section = $('#like-count-section-' + postID);
+
+                    if (data.update_like) {
+                        liked_button_section.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'blue').css('font-weight', 'normal');
+                        form.data('liked-section',true);
+                        liked_count_section.html(data.update_like_count + ' like' + (data.update_like_count > 1 ? 's' : '') +' <i class="fas fa-thumbs-up"></i>').css('color', 'blue').css('font-weight', 'normal');
+                    } else {
+                        liked_button_section.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'black');
+                        form.data('liked-section',false);
+                        liked_count_section.html(data.update_like_count + ' like' + (data.update_like_count > 1 ? 's' : ''));
+                    }
+                }
+            });
         }, 10);
     } else {
         closeCommentPopup();
@@ -687,26 +715,26 @@ $(document).ready(function() {
     }
 });
 
-function turnoncommentAndRefresh(postID) {
-    var scrollPosition = $(window).scrollTop();
-    localStorage.setItem("scrollPosition", scrollPosition);
-    setTimeout(function() {
-        location.reload();
-    }, 10);
-    sessionStorage.setItem("currentPostID", postID);
-            }
-    window.onload = function() {
-        var currentPostID = sessionStorage.getItem("currentPostID");
-        if (currentPostID) {
-            sessionStorage.removeItem("currentPostID");
-            setTimeout(function() {
-                var popup = document.getElementById("comment-popup-" + currentPostID);
-                if (popup) {
-                    popup.style.display = "block";
-                }
-            },10);
-        }
-};
+// function turnoncommentAndRefresh(postID) {
+//     var scrollPosition = $(window).scrollTop();
+//     localStorage.setItem("scrollPosition", scrollPosition);
+//     setTimeout(function() {
+//         location.reload();
+//     }, 10);
+//     sessionStorage.setItem("currentPostID", postID);
+//             }
+//     window.onload = function() {
+//         var currentPostID = sessionStorage.getItem("currentPostID");
+//         if (currentPostID) {
+//             sessionStorage.removeItem("currentPostID");
+//             setTimeout(function() {
+//                 var popup = document.getElementById("comment-popup-" + currentPostID);
+//                 if (popup) {
+//                     popup.style.display = "block";
+//                 }
+//             },10);
+//         }
+// };
 
 function searchUser() {
     var query = document.getElementById("searchInput").value;
@@ -770,14 +798,16 @@ $(document).on('submit', '#share-form', function(e) {
         processData: false,
         contentType: false,
         success: function(data) {  
-            var scrollPosition = $(window).scrollTop();
-            localStorage.setItem("scrollPosition", scrollPosition);
+            var Share_count =  $('#share-count-' + shareId);
+            var popupCard = document.getElementById('share-card-' + shareId);               
             if (data.boolean){
                 toastr.success('Đã chia sẻ bài viết lên trang cá nhân của bạn!', 'Thông báo');
-                setTimeout(function() {location.reload(); }, 1000);} 
+                Share_count.html(data.share_user_count + ' share' + (data.share_user_count > 1 ? 's' : '')+' <i class="fas fa-share"></i>').css('color', 'green').css('font-weight', 'normal');
+                popupCard.style.display = 'none';
+            }               
             else {
                 toastr.success('Bạn đã chia sẽ bài viết này 1 lần rồi', 'Thông báo');
-                setTimeout(function() {location.reload(); }, 1000);
+                popupCard.style.display = 'none';                
             }     
         }
     });
@@ -902,9 +932,9 @@ $(document).on('submit', '#send-comment', function(e) {
                                                         </div>
                                                         <small class="formatted-text">`+comment_massage+`</small>
                                                     </div>
-                                                    <div class="dropdown">
-                                                        <span onclick="myFunction('`+comment_id+`')" class="dropbtn"><i class="fas fa-ellipsis-v"></i></span>
-                                                        <div id="myDropdown-`+comment_id+`" class="dropdown-content dropdown-`+comment_id+`">
+                                                    <div class="dropdown_comment">
+                                                        <span onclick="myFunction('`+comment_id+`')" class="dropbtn_comment"><i class="fas fa-ellipsis-v"></i></span>
+                                                        <div id="myDropdown-`+comment_id+`" class="dropdown-content_comment dropdown_comment-`+comment_id+`">
                                                             `+dropbox+`
                                                         </div>
                                                     </div> 
@@ -952,14 +982,36 @@ $(document).on('submit', '#send-comment', function(e) {
             form.find('input[name="message"]').val('');
             $("#massage_image").val('');
 
+            $(document).on('submit', '#del_comments', function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var DelcommentId = data.comment_id;
+                $.ajax({
+                    type: 'POST',
+                    url: '/del_comment/' + DelcommentId + '/',
+                    data: {
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() 
+                    },
+                    success: function(data) {
+                        if (data.commit) {
+                            $('#delete-comment-' + DelcommentId).remove();
+                        } else {
+                            alert('Không thể xóa comment: ' + data.error);
+                        }
+                    },    
+                });
+            })
+
             $(document).on('submit', 'form[id^="repply-form1-"]', function(e) {
                 e.preventDefault();
                 var form = $(this);
                 var comment_id = form.data('comment-id');
                 console.log('ajax:',comment_id)
                 var rep_message = form.find('input[name="rep_message"]').val();
-                var rep_mess_image = form.find('input[name="rep_mess_image"]').prop('files')[0];
+                var rep_mess_image = $("#rep_mess_image").prop('files')[0];
                 var formData = new FormData(this); 
+                formData.append('rep_message', rep_message);
+                formData.append('rep_mess_image', rep_mess_image);
                 formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
             $.ajax({
                 type: 'POST',
@@ -986,8 +1038,22 @@ $(document).on('submit', '#send-comment', function(e) {
                                                             <div class="desc">Cinque Terre Unique</div>
                                                         </div>
                                                     `   };
+                    var dropbox_rp = '';
+                        if (repply_user_username===user) {
+                            dropbox_rp = `
+                                            <div class="button-group-vertical">                            
+                                                <form action="{% url 'del_repply_comment' 0 %}" method="post" id="del_repply" data-del-rep-id="`+repply_id+`">
+                                                    {% csrf_token %}
+                                                    <button type="submit">Xóa bình luận</button>
+                                                </form>
+                                                <form action="#" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit">Chỉnh sửa</button>
+                                                </form>                                                                                       
+                                            </div>
+                                        `};
 
-                    var NewRepplyCommentHTML=   `   <div class="repply_section_component">
+                    var NewRepplyCommentHTML=   `   <div class="repply_section_component" id="delete-repply-`+repply_id+`">
                                                         <div class="comment-avatar">
                                                             <div>
                                                                 <a href="`+profile_url_repply+`">
@@ -1004,27 +1070,7 @@ $(document).on('submit', '#send-comment', function(e) {
                                                                     <div class="dropdown_rep">
                                                                         <span onclick="Repply_component('`+repply_id+`')" class="dropbtn_rep"><i class="fas fa-ellipsis-v"></i></span>
                                                                         <div id="repply_dropdown-`+repply_id+`" class="dropdown-content_rep dropdown_rep-`+repply_id+`">
-                                                                        <div class="button-group-vertical">
-                                                                            {% if rep_comment.user_rep == request.user %}
-                                                                                <form action="#" method="post" id="del_repply" data-del-rep-id="`+repply_id+`">
-                                                                                    {% csrf_token %}
-                                                                                    <button type="submit">Xóa bình luận</button>
-                                                                                </form>
-                                                                                <form action="#" method="post">
-                                                                                    {% csrf_token %}
-                                                                                    <button type="submit">Chỉnh sửa</button>
-                                                                                </form>                                               
-                                                                            {% else %}
-                                                                                <form action="#" method="post">
-                                                                                    {% csrf_token %}
-                                                                                    <button type="submit">Ẩn bình luận</button>
-                                                                                </form>
-                                                                                <form action="#" method="post">
-                                                                                    {% csrf_token %}
-                                                                                    <button type="submit">Báo cáo</button>
-                                                                                </form>
-                                                                            {% endif %}
-                                                                        </div>
+                                                                            `+dropbox_rp+`
                                                                         </div>
                                                                     </div> 
                                                                 </div>
@@ -1044,30 +1090,29 @@ $(document).on('submit', '#send-comment', function(e) {
                     form.find('input[name="rep_message"]').val('');
                     $("#rep_mess_image").val('');
 
+                    $(document).on('submit', '#del_repply', function(e) {
+                        e.preventDefault();
+                        var form = $(this);
+                        var repplyID = form.data('del-rep-id');
+                        $.ajax({
+                            type: 'POST',
+                            url: '/del_repply_comment/' + repplyID + '/',
+                            data: {
+                                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() 
+                            },
+                            success: function(data) {
+                                if (data.commit1) {
+                                    $('#delete-repply-' + repplyID).remove();
+                                } else {
+                                    alert('Không thể xóa comment: ' + data.error);
+                                }
+                            },     
+                        });
+                        })
                 },
                 error: function(error) {
                 }
             });
-
-            $(document).on('submit', '#del_comments', function(e) {
-                e.preventDefault();
-                var form = $(this);
-                var DelcommentId = data.comment_id;
-                $.ajax({
-                    type: 'POST',
-                    url: '/del_comment/' + DelcommentId + '/',
-                    data: {
-                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() 
-                    },
-                    success: function(data) {
-                        if (data.commit) {
-                            $('#delete-comment-' + DelcommentId).remove();
-                        } else {
-                            alert('Không thể xóa comment: ' + data.error);
-                        }
-                    },    
-            });
-            })
             });
         } 
     });
@@ -1080,8 +1125,8 @@ $(document).on('submit', 'form[id^="repply-form-"]', function(e) {
     var comment_id = form.data('comment-id');
     console.log('ajax:',comment_id)
     var rep_message = form.find('input[name="rep_message"]').val();
-    var rep_mess_image = form.find('input[name="rep_mess_image"]').prop('files')[0];
-    var formData = new FormData(); 
+    var rep_mess_image = $("#rep_mess_image").prop('files')[0];
+    var formData = new FormData(this); 
     formData.append('rep_message', rep_message);
     formData.append('rep_mess_image', rep_mess_image);
     formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
@@ -1092,6 +1137,7 @@ $(document).on('submit', 'form[id^="repply-form-"]', function(e) {
         processData: false,
         contentType: false,
         success: function(data) {
+            var user = data.user;
             var repply_id = data.repply_id;
             var repply_user_username = data.repply_user_username;
             var repply_user_id = data.repply_user_id;
@@ -1109,8 +1155,23 @@ $(document).on('submit', 'form[id^="repply-form-"]', function(e) {
                                                     <div class="desc">Cinque Terre Unique</div>
                                                 </div>
                                             `   };
+            var dropbox_rp = '';
+                if (repply_user_username===user) {
+                    dropbox_rp = `
+                                    <div class="button-group-vertical">                            
+                                        <form action="{% url 'del_repply_comment' 0 %}" method="post" id="del_repply" data-del-rep-id="`+repply_id+`">
+                                            {% csrf_token %}
+                                            <button type="submit">Xóa bình luận</button>
+                                        </form>
+                                        <form action="#" method="post">
+                                            {% csrf_token %}
+                                            <button type="submit">Chỉnh sửa</button>
+                                        </form>                                                                                       
+                                    </div>
+                                `};
 
-            var NewRepplyCommentHTML=   `   <div class="repply_section_component">
+
+            var NewRepplyCommentHTML=   `   <div class="repply_section_component" id="delete-repply-`+repply_id+`">
                                                 <div class="comment-avatar">
                                                     <div>
                                                         <a href="`+profile_url_repply+`">
@@ -1127,27 +1188,7 @@ $(document).on('submit', 'form[id^="repply-form-"]', function(e) {
                                                             <div class="dropdown_rep">
                                                                 <span onclick="Repply_component('`+repply_id+`')" class="dropbtn_rep"><i class="fas fa-ellipsis-v"></i></span>
                                                                 <div id="repply_dropdown-`+repply_id+`" class="dropdown-content_rep dropdown_rep-`+repply_id+`">
-                                                                <div class="button-group-vertical">
-                                                                    {% if rep_comment.user_rep == request.user %}
-                                                                        <form action="#" method="post" id="del_repply" data-del-rep-id="`+repply_id+`">
-                                                                            {% csrf_token %}
-                                                                            <button type="submit">Xóa bình luận</button>
-                                                                        </form>
-                                                                        <form action="#" method="post">
-                                                                            {% csrf_token %}
-                                                                            <button type="submit">Chỉnh sửa</button>
-                                                                        </form>                                               
-                                                                    {% else %}
-                                                                        <form action="#" method="post">
-                                                                            {% csrf_token %}
-                                                                            <button type="submit">Ẩn bình luận</button>
-                                                                        </form>
-                                                                        <form action="#" method="post">
-                                                                            {% csrf_token %}
-                                                                            <button type="submit">Báo cáo</button>
-                                                                        </form>
-                                                                    {% endif %}
-                                                                </div>
+                                                                    `+dropbox_rp+`
                                                                 </div>
                                                             </div> 
                                                         </div>
@@ -1156,7 +1197,7 @@ $(document).on('submit', 'form[id^="repply-form-"]', function(e) {
                                         `
             if (hasRepplyCommentImage){                      
                 NewRepplyCommentHTML += `   
-                                                <div class="dropdown-image">
+                                            <div class="dropdown-image">
                                                     ` + repply_comment_imageHTML +`
                                                 </div>                          
                                             </div>                                                   
@@ -1164,6 +1205,29 @@ $(document).on('submit', 'form[id^="repply-form-"]', function(e) {
             var newrepplyComment = $(NewRepplyCommentHTML);
             $("#repply-section-" + comment_id).append(newrepplyComment);
 
+            form.find('input[name="rep_message"]').val('');
+            $("#rep_mess_image").val('');
+
+            
+            $(document).on('submit', '#del_repply', function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var repplyID = form.data('del-rep-id');
+                $.ajax({
+                    type: 'POST',
+                    url: '/del_repply_comment/' + repplyID + '/',
+                    data: {
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() 
+                    },
+                    success: function(data) {
+                        if (data.commit1) {
+                            $('#delete-repply-' + repplyID).remove();
+                        } else {
+                            alert('Không thể xóa comment: ' + data.error);
+                        }
+                    },     
+                });
+            })
         },
         error: function(error) {
         }
@@ -1183,6 +1247,26 @@ $(document).on('submit', '#del_comments', function(e) {
         success: function(data) {
             if (data.commit) {
                 $('#delete-comment-' + DelcommentId).remove();
+            } else {
+                alert('Không thể xóa comment: ' + data.error);
+            }
+        },     
+});
+})
+
+$(document).on('submit', '#del_repply', function(e) {
+    e.preventDefault();
+    var form = $(this);
+    var repplyID = form.data('del-rep-id');
+    $.ajax({
+        type: 'POST',
+        url: '/del_repply_comment/' + repplyID + '/',
+        data: {
+            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() 
+        },
+        success: function(data) {
+            if (data.commit1) {
+                $('#delete-repply-' + repplyID).remove();
             } else {
                 alert('Không thể xóa comment: ' + data.error);
             }

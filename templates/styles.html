@@ -1244,17 +1244,6 @@ function validateInput2() {
     }
     }
 
-function validateInput3() {
-    var input = document.getElementById("commentbox");
-    var button = document.getElementById("commentbox_btn");
-
-    if (input.value.trim() === "") {
-        button.disabled = true;
-    } else {
-        button.disabled = false;
-    }
-    }
-
 function toggleDropdownContent(dropdown) {
     var dropdownContent = dropdown.querySelector(".dropdown-content_comment");
     dropdownContent.classList.toggle("show");
