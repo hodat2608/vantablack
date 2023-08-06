@@ -253,12 +253,11 @@ def update_post_likes(request,pk):
     user = request.user
     if request.method == 'POST':
         if user in post_like_is.post_likes.all():
-            post_like_is.post_likes.remove(user)
-            update_like = False
+            update_like = True
         else:
-            update_like = True 
-            post_like_is.post_likes.add(user)
+            update_like = False
     update_like_count = post_like_is.post_likes.count()
+    print('update_count: ',update_like_count)
     context = {'update_like':update_like,'update_like_count':update_like_count}
     return JsonResponse(context)
             

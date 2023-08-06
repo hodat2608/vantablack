@@ -142,7 +142,7 @@
                         {% else %}
                             {% if post.post_likes.count > 0 %}
                                 <div class="left-align">
-                                    <p  class="my-text" id="like-count-{{ post.id }}">{{ post.post_likes.count }} like{{ post.post_likes.count|pluralize }} <i class="fas fa-thumbs-up"></i></p> 
+                                    <p id="like-count-{{ post.id }}">{{ post.post_likes.count }} like{{ post.post_likes.count|pluralize }} <i class="fas fa-thumbs-up"></i></p> 
                                 </div>
                                 <div class="right-align">
                                     {% if post.commentviews_set.count >= 1 %}
@@ -158,7 +158,7 @@
                                 </div>
                             {% else %}
                                 <div class="left-align">
-                                    <p  class="my-text" id="like-count-{{ post.id }}"></i></p>
+                                    <p id="like-count-{{ post.id }}"></i></p>
                                 </div>
                                 <div class="right-align">
                                     {% if post.commentviews_set.count >= 1 %}
@@ -206,7 +206,7 @@
                         <button type="submit" onclick="toggleCommentPopupWithDelay('{{ post.id }}')"><i class="fas fa-comment"></i> Comment</button>
                     </form> -->
 
-                    <form id="like-form" method="post">
+                    <form method="post">
                         {% csrf_token %}
                         <button type="button" onclick="toggleCommentPopupWithDelay('{{ post.id }}')"><i class="fas fa-comment"></i> Comment</button>
                     </form>
@@ -280,7 +280,7 @@
                         
                     </div> 
 
-                    <div class="info-container">
+                    <!-- <div class="info-container">
                         {% if request.user in post.post_likes.all %} 
                             {% if post.post_likes.count > 1 %}
                                 <div class="left-align">
@@ -352,6 +352,24 @@
                             {% endif %}   
                         {% endif %} 
                         
+                    </div> -->
+
+                    <div class="info-container">
+                        <div class="left-align">
+                            <p id="like-count-section-{{ post.id }}"></p>
+                        </div>
+                        <div class="right-align">
+                            {% if post.commentviews_set.count >= 1 %}
+                                <p>{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p>
+                            {% else %} 
+                                <p>.</p>
+                            {% endif %} 
+                            {% if post.post_shares.count > 0 %}
+                                <p>{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
+                            {% else %}
+                                <p>.</p>
+                            {% endif %} 
+                        </div>                     
                     </div>
             
                     <div class="btn-group"> 
@@ -617,7 +635,6 @@ $(document).on('submit', '#like-popup-form', function(e) {
     e.preventDefault();
     var form = $(this);
     var likeId_1 = form.data('like-id-section');
-    var section_data = form.data('liked-section')
     var popup = document.getElementById("comment-popup-" + likeId_1);
     var popupScrollPosition = $(popup).scrollTop();
 
@@ -665,19 +682,31 @@ function toggleCommentPopupWithDelay(postID) {
             $.ajax({
                 type: 'POST',
                 url: '/update_post_likes/' + postID + '/',
+                data:{csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() },                                      
                 success: function(data) {
+                    console.log("postID:", postID);
                     var liked_button_section = $('#like-button-section-' + postID);
                     var liked_count_section = $('#like-count-section-' + postID);
-
                     if (data.update_like) {
                         liked_button_section.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'blue').css('font-weight', 'normal');
-                        form.data('liked-section',true);
+                        liked_button_section.data('liked-section', true);                       
+                        if (data.update_like_count > 0) {
                         liked_count_section.html(data.update_like_count + ' like' + (data.update_like_count > 1 ? 's' : '') +' <i class="fas fa-thumbs-up"></i>').css('color', 'blue').css('font-weight', 'normal');
-                    } else {
+                        } else {
+                            liked_count_section.text(''); 
+                        }  
+                    
+                    } else {            
                         liked_button_section.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'black');
-                        form.data('liked-section',false);
-                        liked_count_section.html(data.update_like_count + ' like' + (data.update_like_count > 1 ? 's' : ''));
+                        liked_button_section.data('liked-section', false);
+                        console.log(data.update_like_count);
+                        if (data.update_like_count > 0) {
+                        liked_count_section.html(data.update_like_count + ' like' + (data.update_like_count > 1 ? 's' : '') +' <i class="fas fa-thumbs-up"></i>').css('color', 'black').css('font-weight', 'normal');
+                        } else {
+                            liked_count_section.text(''); 
+                        }  
                     }
+                    
                 }
             });
         }, 10);
@@ -714,27 +743,6 @@ $(document).ready(function() {
         localStorage.removeItem("sendcommentId"); 
     }
 });
-
-// function turnoncommentAndRefresh(postID) {
-//     var scrollPosition = $(window).scrollTop();
-//     localStorage.setItem("scrollPosition", scrollPosition);
-//     setTimeout(function() {
-//         location.reload();
-//     }, 10);
-//     sessionStorage.setItem("currentPostID", postID);
-//             }
-//     window.onload = function() {
-//         var currentPostID = sessionStorage.getItem("currentPostID");
-//         if (currentPostID) {
-//             sessionStorage.removeItem("currentPostID");
-//             setTimeout(function() {
-//                 var popup = document.getElementById("comment-popup-" + currentPostID);
-//                 if (popup) {
-//                     popup.style.display = "block";
-//                 }
-//             },10);
-//         }
-// };
 
 function searchUser() {
     var query = document.getElementById("searchInput").value;
