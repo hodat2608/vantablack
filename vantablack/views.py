@@ -32,14 +32,16 @@ def homepage(request,):
 def post_likes_homepage(request,pk):
     post = PostViews.objects.get(pk=pk)
     user = request.user
+    likes_count = post.post_likes.count() #3
     if request.method == 'POST':
         if user in post.post_likes.all():
             post.post_likes.remove(user)
             liked = False
+            # likes_count = (int(likes_count)-1)
+            likes_count = post.post_likes.count()
         else:
             post.post_likes.add(user)
             liked = True
-    likes_count = post.post_likes.count()
     all_user_like = list(post.post_likes.all().values_list('username', flat=True))
     context = {'liked':liked, 'likes_count':likes_count, 'all_user_like':all_user_like}
     return JsonResponse(context)
@@ -111,14 +113,15 @@ def post_comment_section(request,pk):
 def post_like_post_comment_section(request,pk):
     post_like_post_comment_section_id = get_object_or_404(PostViews,pk=pk)
     user = request.user
+    likes_count_section = post_like_post_comment_section_id.post_likes.count()#3
     if request.method == 'POST':
         if user in post_like_post_comment_section_id.post_likes.all():
             post_like_post_comment_section_id.post_likes.remove(user)
             liked_section = False
+            likes_count_section = post_like_post_comment_section_id.post_likes.count()            
         else:
             post_like_post_comment_section_id.post_likes.add(user)
             liked_section = True 
-    likes_count_section = post_like_post_comment_section_id.post_likes.count()
     context = {'liked_section':liked_section,'likes_count_section':likes_count_section}
     return JsonResponse(context)
 
@@ -251,14 +254,16 @@ def share_post_views(request,pk):
 def update_post_likes(request,pk):
     post_like_is = get_object_or_404(PostViews,pk=pk)
     user = request.user
+    update_like_count = post_like_is.post_likes.count()
+    update_comment_count = post_like_is.commentviews_set.count()
     if request.method == 'POST':
         if user in post_like_is.post_likes.all():
             update_like = True
+            update_like_count = int(int(update_like_count)-1)
         else:
             update_like = False
-    update_like_count = post_like_is.post_likes.count()
     print('update_count: ',update_like_count)
-    context = {'update_like':update_like,'update_like_count':update_like_count}
+    context = {'update_like':update_like,'update_like_count':update_like_count,'update_comment_count':update_comment_count}
     return JsonResponse(context)
             
 

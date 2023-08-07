@@ -107,16 +107,16 @@
                         {% if request.user in post.post_likes.all %} 
                             {% if post.post_likes.count > 1 %}
                                 <div class="left-align">
-                                    <p class="my-text" id="like-count-{{ post.id }}">Bạn và {{ post.post_likes.count }} người khác <i class="fas fa-thumbs-up"></i></p>
-                                </div>
+                                    <p class="my-text" id="like-count-{{ post.id }}">{{ post.post_likes.count }} <i class="fas fa-thumbs-up"></i></p>
+                                </div>                               
                                 <div class="right-align">
                                     {% if post.commentviews_set.count >= 1 %}
-                                        <p>{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p>
+                                        <p id="comment-count-{{ post.id }}">{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p>
                                     {% else %} 
-                                        <p>.</p>
+                                        <p id="comment-count-{{ post.id }}">.</p>
                                     {% endif %} 
                                     {% if post.post_shares.count > 0 %}
-                                        <p >{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
+                                        <p id="share-count-{{ post.id }}">{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
                                     {% else %}
                                         <p id="share-count-{{ post.id }}">.</p>
                                     {% endif %} 
@@ -127,12 +127,12 @@
                                 </div>
                                 <div class="right-align">
                                     {% if post.commentviews_set.count >= 1 %}
-                                        <p>{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p> 
+                                        <p id="comment-count-{{ post.id }}">{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p> 
                                     {% else %} 
-                                        <p>.</p>
+                                        <p id="comment-count-{{ post.id }}">.</p>
                                     {% endif %}
                                     {% if post.post_shares.count > 0 %}
-                                        <p >{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
+                                        <p id="share-count-{{ post.id }}">{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
                                     {% else %}
                                         <p id="share-count-{{ post.id }}">.</p>
                                     {% endif %}
@@ -142,16 +142,16 @@
                         {% else %}
                             {% if post.post_likes.count > 0 %}
                                 <div class="left-align">
-                                    <p id="like-count-{{ post.id }}">{{ post.post_likes.count }} like{{ post.post_likes.count|pluralize }} <i class="fas fa-thumbs-up"></i></p> 
+                                    <p id="like-count-{{ post.id }}">{{ post.post_likes.count }}<i style="margin-left: 5px;" class="fas fa-thumbs-up"></i></p> 
                                 </div>
                                 <div class="right-align">
                                     {% if post.commentviews_set.count >= 1 %}
-                                        <p>{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p> 
+                                        <p id="comment-count-{{ post.id }}">{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p> 
                                     {% else %} 
-                                        <p>.</p>
+                                        <p id="comment-count-{{ post.id }}">.</p>
                                     {% endif %}
                                     {% if post.post_shares.count > 0 %}
-                                        <p >{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
+                                        <p id="share-count-{{ post.id }}">{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
                                     {% else %}
                                         <p id="share-count-{{ post.id }}">.</p>
                                     {% endif %}
@@ -162,9 +162,9 @@
                                 </div>
                                 <div class="right-align">
                                     {% if post.commentviews_set.count >= 1 %}
-                                        <p>{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p> 
+                                        <p id="comment-count-{{ post.id }}">{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p> 
                                     {% else %} 
-                                        <p>.</p>
+                                        <p id="comment-count-{{ post.id }}">.</p>
                                     {% endif %}
                                     {% if post.post_shares.count > 0 %}
                                         <p id="share-count-{{ post.id }}">{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
@@ -199,16 +199,9 @@
                         </button>
                     </form>
 
-                    <!-- <button  onclick="turnoncommentAndRefresh('{{ post.id }}')"><i class="fas fa-comment"></i> Comment</button> -->
-
-                    <!-- <form action="{% url 'update_post_likes' 0 %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" onclick="toggleCommentPopupWithDelay('{{ post.id }}')"><i class="fas fa-comment"></i> Comment</button>
-                    </form> -->
-
                     <form method="post">
                         {% csrf_token %}
-                        <button type="button" onclick="toggleCommentPopupWithDelay('{{ post.id }}')"><i class="fas fa-comment"></i> Comment</button>
+                        <button type="button" onclick="OpenCommentPopup('{{ post.id }}')"><i class="fas fa-comment"></i> Comment</button>
                     </form>
 
                     <button type="submit" id="share-button-{{ post.id }}"> <i class="fas fa-share"></i> Share</button>
@@ -264,7 +257,7 @@
                             <div class="datesince">
                                 <div class="close_icon_popup_comment_section">
                                     <a href="{% url 'post_profile' post.post_user_id %}">{{ post.post_user }}</a>
-                                    <button onclick="closePopupAndReload()"><i class="fas fa-times"></i></button>
+                                    <button onclick="closeCommentPopup('{{ post.id }}')"><i class="fas fa-times"></i></button>
                                 </div>
                                 <li>{{post.created|timesince}} ago</li>
                             </div>
@@ -279,80 +272,6 @@
                         {% endif %}   
                         
                     </div> 
-
-                    <!-- <div class="info-container">
-                        {% if request.user in post.post_likes.all %} 
-                            {% if post.post_likes.count > 1 %}
-                                <div class="left-align">
-                                    <p id="like-count-section-{{ post.id }}">Bạn và {{ post.post_likes.count }} người khác <i class="fas fa-thumbs-up"></i></p>
-                                </div>
-                                <div class="right-align">
-                                    {% if post.commentviews_set.count >= 1 %}
-                                        <p>{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p>
-                                    {% else %} 
-                                        <p>.</p>
-                                    {% endif %} 
-                                    {% if post.post_shares.count > 0 %}
-                                        <p>{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
-                                    {% else %}
-                                        <p>.</p>
-                                    {% endif %} 
-                                </div>  
-                            {% else %} 
-                                <div class="left-align">
-                                    <p class="my-text" id="like-count-section-{{ post.id }}">Bạn <i class="fas fa-thumbs-up"></i></p>
-                                </div>
-                                <div class="right-align">
-                                    {% if post.commentviews_set.count >= 1 %}
-                                        <p>{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p> 
-                                    {% else %} 
-                                        <p>.</p>
-                                    {% endif %}
-                                    {% if post.post_shares.count > 0 %}
-                                        <p>{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
-                                    {% else %}
-                                        <p>.</p>
-                                    {% endif %}
-                                </div>
-                            {% endif %}
-                            
-                        {% else %}
-                            {% if post.post_likes.count > 0 %}
-                                <div class="left-align">
-                                    <p id="like-count-section-{{ post.id }}">{{ post.post_likes.count }} like{{ post.post_likes.count|pluralize }} <i class="fas fa-thumbs-up"></i></p> 
-                                </div>
-                                <div class="right-align">
-                                    {% if post.commentviews_set.count >= 1 %}
-                                        <p>{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p> 
-                                    {% else %} 
-                                        <p>.</p>
-                                    {% endif %}
-                                    {% if post.post_shares.count > 0 %}
-                                        <p>{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
-                                    {% else %}
-                                        <p>.</p>
-                                    {% endif %}
-                                </div>
-                            {% else %}
-                                <div class="left-align">
-                                    <p id="like-count-section-{{ post.id }}"></i></p>
-                                </div>
-                                <div class="right-align">
-                                    {% if post.commentviews_set.count >= 1 %}
-                                        <p>{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p> 
-                                    {% else %} 
-                                        <p>.</p>
-                                    {% endif %}
-                                    {% if post.post_shares.count > 0 %}
-                                        <p>{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
-                                    {% else %}
-                                        <p>.</p>
-                                    {% endif %}
-                                </div>
-                            {% endif %}   
-                        {% endif %} 
-                        
-                    </div> -->
 
                     <div class="info-container">
                         <div class="left-align">
@@ -603,24 +522,27 @@ $(document).on('submit', '#like-form', function(e) {
         var Liked_count =  $('#like-count-' + likeId);
         var Liked_user =   $('#list_like-'  + likeId);
         var thongdiep =  $('#thongdiep-'  + likeId);
-
+        console.log('flag:',data.liked);
         if (data.liked) {
             Liked_button.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'blue').css('font-weight', 'normal');
-            form.data('liked',true);
-            if (data.likes_count > 0) {
-                Liked_count.html(data.likes_count + ' like' + (data.likes_count > 1 ? 's' : '') +'  <i class="fas fa-thumbs-up"></i>').css('color', 'blue').css('font-weight', 'normal');
-                } else {
-                    Liked_count.text(''); 
-                }
+            // form.data('liked',true);
+            // console.log('xanh:',data.liked);
+            if (data.likes_count > 1) {
+                Liked_count.html('Bạn và '+ data.likes_count + ' người khác'+'  <i class="fas fa-thumbs-up"></i>').css('color', 'blue').css('font-weight', 'normal');
+            } else {
+                Liked_count.html( 'Bạn ' + '<i class="fas fa-thumbs-up"></i>').css('color', 'blue').css('font-weight', 'normal'); 
+            }
+            
         }
         else {
             Liked_button.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'black').css('font-weight', 'normal');
-            form.data('liked',false);
+            // form.data('liked',false);
+            // console.log('den:',data.liked);
             if (data.likes_count > 0) {
-                Liked_count.text(data.likes_count + ' like' + (data.likes_count > 1 ? 's' : ''));
-                } else {
-                    Liked_count.text(''); 
-                }
+                Liked_count.html(data.likes_count +'  <i class="fas fa-thumbs-up"></i>').css('color', 'black').css('font-weight', 'normal');
+            } else {
+                Liked_count.text(''); 
+            }
         };
         Liked_user.empty();
             for (var i = 0; i < data.all_user_like.length; i++) {
@@ -650,31 +572,31 @@ $(document).on('submit', '#like-popup-form', function(e) {
 
             if (data.liked_section) {
             liked_button_section.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'blue').css('font-weight', 'normal');
-            form.data('liked-section',true);
-            if (data.likes_count_section > 0) {
-                liked_count_section.html(data.likes_count_section + ' like' + (data.likes_count_section > 1 ? 's' : '') +' <i class="fas fa-thumbs-up"></i>').css('color', 'blue').css('font-weight', 'normal');
-                } else {
-                    liked_count_section.text(''); 
+            // form.data('liked-section',true);
+                if (data.likes_count_section > 1) {
+                    liked_count_section.html('Bạn và '+ data.likes_count_section + ' người khác'+'  <i class="fas fa-thumbs-up"></i>').css('color', 'blue').css('font-weight', 'normal');
+                } 
+                else {
+                    liked_count_section.html( 'Bạn ' + '<i class="fas fa-thumbs-up"></i>').css('color', 'blue').css('font-weight', 'normal'); 
                 }   
-        }
-        else {
-            liked_button_section.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'black');
-            form.data('liked-section',false);
-            if (data.likes_count_section > 0) {
-                liked_count_section.html(data.likes_count_section + ' like' + (data.likes_count_section > 1 ? 's' : ''));
-                } else {
+            }
+            else {
+                liked_button_section.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'black');
+                // form.data('liked-section',false);
+                if (data.likes_count_section > 0) {
+                    liked_count_section.html(data.likes_count_section +'  <i class="fas fa-thumbs-up"></i>').css('color', 'black').css('font-weight', 'normal');
+                } 
+                else {
                     liked_count_section.text(''); 
                 }
-           
-        };         
+            };         
         }
     });
 });
 
 var currentPostID = null;
-function toggleCommentPopupWithDelay(postID) {
+function OpenCommentPopup(postID) {
     if (currentPostID !== postID) {
-        closeCommentPopup();
         currentPostID = postID;
         setTimeout(function() {
             var popup = document.getElementById("comment-popup-" + postID);
@@ -689,20 +611,22 @@ function toggleCommentPopupWithDelay(postID) {
                     var liked_count_section = $('#like-count-section-' + postID);
                     if (data.update_like) {
                         liked_button_section.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'blue').css('font-weight', 'normal');
-                        liked_button_section.data('liked-section', true);                       
-                        if (data.update_like_count > 0) {
-                        liked_count_section.html(data.update_like_count + ' like' + (data.update_like_count > 1 ? 's' : '') +' <i class="fas fa-thumbs-up"></i>').css('color', 'blue').css('font-weight', 'normal');
-                        } else {
-                            liked_count_section.text(''); 
+                        // liked_button_section.data('liked-section', true);                       
+                        if (data.update_like_count > 1) {
+                        liked_count_section.html('Bạn và '+ data.update_like_count + ' người khác'+'  <i class="fas fa-thumbs-up"></i>').css('color', 'blue').css('font-weight', 'normal');
+                        } 
+                        else {
+                            liked_count_section.html( 'Bạn ' + '<i class="fas fa-thumbs-up"></i>').css('color', 'blue').css('font-weight', 'normal'); 
                         }  
                     
                     } else {            
                         liked_button_section.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'black');
-                        liked_button_section.data('liked-section', false);
+                        // liked_button_section.data('liked-section', false);
                         console.log(data.update_like_count);
                         if (data.update_like_count > 0) {
-                        liked_count_section.html(data.update_like_count + ' like' + (data.update_like_count > 1 ? 's' : '') +' <i class="fas fa-thumbs-up"></i>').css('color', 'black').css('font-weight', 'normal');
-                        } else {
+                        liked_count_section.html(data.update_like_count + ' <i class="fas fa-thumbs-up"></i>').css('color', 'black').css('font-weight', 'normal');
+                        } 
+                        else {
                             liked_count_section.text(''); 
                         }  
                     }
@@ -715,20 +639,46 @@ function toggleCommentPopupWithDelay(postID) {
         currentPostID = null;
     }
 }
-function closeCommentPopup() {
+
+function closeCommentPopup(postID) {
     if (currentPostID !== null) {
-        var popup = document.getElementById("comment-popup-" + currentPostID);
+        var popup = document.getElementById("comment-popup-" + postID);
         popup.style.display = "none";
         currentPostID = null;
+        $.ajax({
+            type: 'POST',
+            url: '/update_post_likes/' + postID + '/',
+            data:{csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() },                                      
+            success: function(data) {
+                console.log("postID:", postID);
+                var Liked_button = $('#like-button-'+ postID);
+                var Liked_count =  $('#like-count-' + postID);
+                var comment_count =  $('#comment-count-' + postID);
+                if (data.update_like) {
+                    comment_count.html( data.update_comment_count +' Comment'+ '<i style="margin-left: 5px;" class="fas fa-comment"></i>').css('color', 'black').css('font-weight', 'normal');
+                    Liked_button.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'blue').css('font-weight', 'normal');                      
+                    if (data.update_like_count > 1) {
+                        Liked_count.html('Bạn và '+ data.update_like_count + ' người khác'+'  <i class="fas fa-thumbs-up"></i>').css('color', 'blue').css('font-weight', 'normal');
+                    } 
+                    else {
+                        Liked_count.html( 'Bạn ' + '<i class="fas fa-thumbs-up"></i>').css('color', 'blue').css('font-weight', 'normal'); 
+                    }  
+                
+                } else {      
+                    comment_count.html( data.update_comment_count +' Comment'+ '<i style="margin-left: 5px;" class="fas fa-comment"></i>').css('color', 'black').css('font-weight', 'normal');      
+                    Liked_button.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'black');
+                    console.log(data.update_like_count);
+                    if (data.update_like_count > 0) {
+                        Liked_count.html(data.update_like_count + ' <i class="fas fa-thumbs-up"></i>').css('color', 'black').css('font-weight', 'normal');
+                    } 
+                    else {
+                        Liked_count.text(''); 
+                    }  
+                }
+                
+            }
+        });
     }
-}
-function closePopupAndReload() {
-    closeCommentPopup();
-    var scrollPosition = $(window).scrollTop();
-    localStorage.setItem("scrollPosition", scrollPosition);
-    setTimeout(function() {
-        location.reload();
-    }, 10);
 }
 
 $(document).ready(function() {
