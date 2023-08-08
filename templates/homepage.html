@@ -233,7 +233,7 @@
                         </div>
                         <div class="setonu">
                             <h5 class="content-discription" id="content-discription-{{ post.id }}">{{ post.discription }}</h5>
-                            <a class="btn-collapse" id="toggle-btn-{{ post.id }}">Xem thêm</a>
+                            <a class="btn-collapse" id="toggle-btn-{{ post.id }}"></a>
                         </div>
                         {% if post.post_image %}
                             <img class="img-post" src =" {{ post.post_image.url}}" width="600">
@@ -265,10 +265,10 @@
 
                         <div class="setonu">
                             <h5 class="content-discription" id="content-discription-{{ post.id }}">{{ post.discription }}</h5>
-                            <a class="btn-collapse" id="toggle-btn-{{ post.id }}">Xem thêm</a>
+                            <a class="btn-collapse" id="toggle-btn-{{ post.id }}"></a>
                         </div>
                         {% if post.post_image %}
-                            <img class="img-post-popup" src =" {{ post.post_image.url}}" width="640" >
+                            <img class="img-post-popup" src =" {{ post.post_image.url}}" width="640">
                         {% endif %}   
                         
                     </div> 
@@ -279,9 +279,9 @@
                         </div>
                         <div class="right-align">
                             {% if post.commentviews_set.count >= 1 %}
-                                <p>{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p>
+                                <p id="comment-count1-{{ post.id }}">{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p>
                             {% else %} 
-                                <p>.</p>
+                                <p id="comment-count1-{{ post.id }}">.</p>
                             {% endif %} 
                             {% if post.post_shares.count > 0 %}
                                 <p>{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
@@ -351,7 +351,7 @@
                                             <div id="myDropdown-{{ comment.id }}" class="dropdown-content_comment dropdown_comment-{{ comment.id }}">
                                                 <div class="button-group-vertical">
                                                     {% if comment.comment_user == request.user %}
-                                                        <form action="{% url 'del_comment' 0 %}" method="post" id="del_comments" data-del-id="{{ comment.id }}">
+                                                        <form action="{% url 'del_comment' 0 %}" method="post" id="del_comments" data-del-id="{{ comment.id }}" data-posts-id="{{ post.id }}">
                                                             {% csrf_token %}
                                                             <button type="submit">Xóa bình luận</button>
                                                         </form>
@@ -391,7 +391,7 @@
                             <div>
                                 <button class="mode-font-rep" data-repply-form="{{ comment.id }}">Phản hồi</button>  
                                 <button class="mode-font-like">Like</button> 
-                            </div>
+                            </div>                           
                             <div class="message-form">
                                 <form action="{% url 'repply_comment' 0 %}" data-comment-id="{{ comment.id }}" id="repply-form-{{ comment.id }}"  method="post" enctype="multipart/form-data" style ="display: none;">
                                     {% csrf_token %}
@@ -406,11 +406,11 @@
                                         </button>
                                     </div>
                                 </form>
-                            </div> 
+                            </div>
                             <div id="repply-section-{{ comment.id }}">
                                 <!-- Đây là nơi chứa các repply -->
                             </div>
-                            <div>
+                            <div id="Reppy-section-popup-{{ comment.id }}" style="display: none;">
                                 {% if comment.repply_commentviews_set.all %}
                                     {% for rep_comment in comment.repply_commentviews_set.all %}
                                         <div class="repply_section_component" id="delete-repply-{{ rep_comment.id }}">
@@ -471,6 +471,11 @@
                                             </div>
                                         </div>
                                     {% endfor %}
+                                {% endif %}
+                            </div>
+                            <div id="repply-button-{{comment.id}}">
+                                {% if comment.repply_commentviews_set.all %}
+                                <i style="margin-left: 50px;font-size: 12px;" class="fas fa-arrow-right"></i><span class="toggle-repply-button" onclick="toggleReppySection('{{comment.id}}')">Xem phản hồi ...</span>
                                 {% endif %}
                             </div> 
                         </div>
@@ -609,7 +614,9 @@ function OpenCommentPopup(postID) {
                     console.log("postID:", postID);
                     var liked_button_section = $('#like-button-section-' + postID);
                     var liked_count_section = $('#like-count-section-' + postID);
+                    var comment_count1 =  $('#comment-count1-' + postID);
                     if (data.update_like) {
+                        comment_count1.html( data.update_comment_count +' Comment'+ '<i style="margin-left: 5px;" class="fas fa-comment"></i>').css('color', 'black').css('font-weight', 'normal');
                         liked_button_section.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'blue').css('font-weight', 'normal');
                         // liked_button_section.data('liked-section', true);                       
                         if (data.update_like_count > 1) {
@@ -619,7 +626,8 @@ function OpenCommentPopup(postID) {
                             liked_count_section.html( 'Bạn ' + '<i class="fas fa-thumbs-up"></i>').css('color', 'blue').css('font-weight', 'normal'); 
                         }  
                     
-                    } else {            
+                    } else {   
+                        comment_count.html( data.update_comment_count +' Comment'+ '<i style="margin-left: 5px;" class="fas fa-comment"></i>').css('color', 'black').css('font-weight', 'normal');         
                         liked_button_section.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'black');
                         // liked_button_section.data('liked-section', false);
                         console.log(data.update_like_count);
@@ -848,6 +856,8 @@ $(document).on('submit', '#send-comment', function(e) {
             var profile_url = data.profile_url;
             var avatar_url = data.avatar_url;
             console.log('ajax0:',comment_id);
+            var comment_count1 =  $('#comment-count1-' + sendcommentId);
+            comment_count1.html( data.comment_count +' Comment'+ '<i style="margin-left: 5px;" class="fas fa-comment"></i>').css('color', 'black').css('font-weight', 'normal');
             var hasCommentImage = comment_massage_image && comment_massage_image.trim() !== '';
             var comment_imageHTML = '';
                 if (hasCommentImage) {
@@ -944,6 +954,7 @@ $(document).on('submit', '#send-comment', function(e) {
                 e.preventDefault();
                 var form = $(this);
                 var DelcommentId = data.comment_id;
+                var postID = data.comment_post_id;
                 $.ajax({
                     type: 'POST',
                     url: '/del_comment/' + DelcommentId + '/',
@@ -951,8 +962,10 @@ $(document).on('submit', '#send-comment', function(e) {
                         csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() 
                     },
                     success: function(data) {
+                        var comment_count1 =  $('#comment-count1-' + postID);
                         if (data.commit) {
                             $('#delete-comment-' + DelcommentId).remove();
+                            comment_count1.html( data.comment_count +' Comment'+ '<i style="margin-left: 5px;" class="fas fa-comment"></i>').css('color', 'black').css('font-weight', 'normal');
                         } else {
                             alert('Không thể xóa comment: ' + data.error);
                         }
@@ -1066,7 +1079,7 @@ $(document).on('submit', '#send-comment', function(e) {
                                 }
                             },     
                         });
-                        })
+                    })
                 },
                 error: function(error) {
                 }
@@ -1196,6 +1209,7 @@ $(document).on('submit', '#del_comments', function(e) {
     e.preventDefault();
     var form = $(this);
     var DelcommentId = form.data('del-id');
+    var postID = form.data('posts-id');
     $.ajax({
         type: 'POST',
         url: '/del_comment/' + DelcommentId + '/',
@@ -1203,8 +1217,10 @@ $(document).on('submit', '#del_comments', function(e) {
             csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() 
         },
         success: function(data) {
+            var comment_count1 =  $('#comment-count1-' + postID);
             if (data.commit) {
                 $('#delete-comment-' + DelcommentId).remove();
+                comment_count1.html( data.comment_count +' Comment'+ '<i style="margin-left: 5px;" class="fas fa-comment"></i>').css('color', 'black').css('font-weight', 'normal');
             } else {
                 alert('Không thể xóa comment: ' + data.error);
             }
@@ -1252,6 +1268,19 @@ $(document).on('click', '.mode-font-rep-js', function() {
         messageForm.hide();
     }
 });
+
+function toggleReppySection(commentID) {
+        var button = document.querySelector("#repply-button-" + commentID + " .toggle-repply-button");
+        var section = document.getElementById("Reppy-section-popup-" + commentID);
+
+        if (section.style.display === "none" || section.style.display === "") {
+            section.style.display = "block";
+            button.textContent = "Thu gọn phản hồi";
+        } else {
+            section.style.display = "none";
+            button.textContent = "Xem phản hồi ...";
+        }
+    }
 
 </script> 
 

@@ -175,6 +175,8 @@ def send_comment(request,pk):
                 message=message,massage_image=massage_image)
             send_message.save()
             avatar_url = send_message.get_comment_user_avatar().url if send_message.get_comment_user_avatar() else '/media/images/default_avatar.jpg'
+            comment_count = comment_for_post.commentviews_set.count()
+            print('comment_count',comment_count)
             new_comment = { 
                 'user': request.user.username if request.user.is_authenticated else None,
                 'avatar_url': avatar_url,
@@ -182,7 +184,9 @@ def send_comment(request,pk):
                 'comment_id': send_message.id,
                 'comment_user_username': send_message.comment_user.username if send_message.comment_user else None,
                 'comment_massage' : send_message.message,
-                'comment_massage_image' : send_message.massage_image.url if send_message.massage_image else " "}              
+                'comment_massage_image' : send_message.massage_image.url if send_message.massage_image else " ",
+                'comment_count':comment_count,
+                'comment_post_id':send_message.post_comment_id,}           
             return JsonResponse(new_comment)
         else: 
             return JsonResponse({'error': 'error_data'}, status=400)
@@ -194,11 +198,14 @@ def send_comment(request,pk):
 @login_required(login_url='user_login')
 def del_comment(request,pk):
     del_comment_id = CommentViews.objects.get(pk=pk)
+    postid = del_comment_id.post_comment_id
+    id = get_object_or_404(PostViews,pk=postid)
     if request.method == 'POST':
         del_comment_id.delete()
         commit = True
+        comment_count = id.commentviews_set.count()
         print(commit) 
-    return JsonResponse({'commit':commit})
+    return JsonResponse({'commit':commit,'comment_count':comment_count})
 
 def repply_comment(request,pk):
     comment_id = CommentViews.objects.get(pk=pk)
