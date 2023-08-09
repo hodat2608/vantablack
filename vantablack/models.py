@@ -156,6 +156,17 @@ class repply_comment_activity(models.Model):
 
     def __str__(self):
         return self.comment_rep_activity
+    
+class save_post(models.Model):
+    user_save = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+    post_save = models.ForeignKey(PostViews, on_delete=models.CASCADE,null=True,blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created']
+
+    def __str__(self):
+        return self.created
 
 
     

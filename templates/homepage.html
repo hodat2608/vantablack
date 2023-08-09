@@ -347,7 +347,7 @@
                                             <small class="formatted-text">{{ comment.message }}</small>
                                         </div>
                                         <div class="dropdown_comment">
-                                            <span onclick="myFunction('{{ comment.id }}')" class="dropbtn_comment"><i class="fas fa-ellipsis-v"></i></span>
+                                            <span  class="dropbtn_comment"><i class="fas fa-ellipsis-v"></i></span>
                                             <div id="myDropdown-{{ comment.id }}" class="dropdown-content_comment dropdown_comment-{{ comment.id }}">
                                                 <div class="button-group-vertical">
                                                     {% if comment.comment_user == request.user %}
@@ -627,7 +627,7 @@ function OpenCommentPopup(postID) {
                         }  
                     
                     } else {   
-                        comment_count.html( data.update_comment_count +' Comment'+ '<i style="margin-left: 5px;" class="fas fa-comment"></i>').css('color', 'black').css('font-weight', 'normal');         
+                        comment_count1.html( data.update_comment_count +' Comment'+ '<i style="margin-left: 5px;" class="fas fa-comment"></i>').css('color', 'black').css('font-weight', 'normal');         
                         liked_button_section.html('<i class="fas fa-thumbs-up"></i> Like').css('color', 'black');
                         // liked_button_section.data('liked-section', false);
                         console.log(data.update_like_count);
@@ -855,6 +855,7 @@ $(document).on('submit', '#send-comment', function(e) {
             var comment_id = data.comment_id;
             var profile_url = data.profile_url;
             var avatar_url = data.avatar_url;
+            var postID = data.comment_post_id;
             console.log('ajax0:',comment_id);
             var comment_count1 =  $('#comment-count1-' + sendcommentId);
             comment_count1.html( data.comment_count +' Comment'+ '<i style="margin-left: 5px;" class="fas fa-comment"></i>').css('color', 'black').css('font-weight', 'normal');
@@ -874,7 +875,7 @@ $(document).on('submit', '#send-comment', function(e) {
             var dropbox ='';
                 if (comment_user_username===user) {
                     dropbox = ` <div class="button-group-vertical">
-                                    <form action="{% url 'del_comment' 0 %}" method="post" id="del_comments" data-del-id="`+comment_id+`">
+                                    <form action="{% url 'del_comment' 0 %}" method="post" id="del_comments1" data-del-id="`+comment_id+`" data-post-ids="`+postID+`">
                                         {% csrf_token %}
                                         <button type="submit">Xóa bình luận</button>
                                     </form>
@@ -886,7 +887,7 @@ $(document).on('submit', '#send-comment', function(e) {
                             `
                 };
 
-            var NewCommentHTML =`   <div class="comment_section_component" id="delete-comment-`+comment_id+`">
+            var NewCommentHTML =`   <div class="comment_section_component" id="delete-comment1-`+comment_id+`">
                                         <div class="comment-avatar">
                                             <div>
                                                 <a href="`+profile_url+`">
@@ -901,7 +902,7 @@ $(document).on('submit', '#send-comment', function(e) {
                                                         <small class="formatted-text">`+comment_massage+`</small>
                                                     </div>
                                                     <div class="dropdown_comment">
-                                                        <span onclick="myFunction('`+comment_id+`')" class="dropbtn_comment"><i class="fas fa-ellipsis-v"></i></span>
+                                                        <span class="dropbtn_comment"><i class="fas fa-ellipsis-v"></i></span>
                                                         <div id="myDropdown-`+comment_id+`" class="dropdown-content_comment dropdown_comment-`+comment_id+`">
                                                             `+dropbox+`
                                                         </div>
@@ -950,28 +951,29 @@ $(document).on('submit', '#send-comment', function(e) {
             form.find('input[name="message"]').val('');
             $("#massage_image").val('');
 
-            $(document).on('submit', '#del_comments', function(e) {
-                e.preventDefault();
-                var form = $(this);
-                var DelcommentId = data.comment_id;
-                var postID = data.comment_post_id;
-                $.ajax({
-                    type: 'POST',
-                    url: '/del_comment/' + DelcommentId + '/',
-                    data: {
-                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() 
-                    },
-                    success: function(data) {
-                        var comment_count1 =  $('#comment-count1-' + postID);
-                        if (data.commit) {
-                            $('#delete-comment-' + DelcommentId).remove();
-                            comment_count1.html( data.comment_count +' Comment'+ '<i style="margin-left: 5px;" class="fas fa-comment"></i>').css('color', 'black').css('font-weight', 'normal');
-                        } else {
-                            alert('Không thể xóa comment: ' + data.error);
-                        }
-                    },    
-                });
-            })
+            // $(document).on('submit', '#del_comments1', function(e) {
+            //     e.preventDefault();
+            //     var form = $(this);
+            //     var DelcommentId = form.data('del-id');
+            //     console.log(DelcommentId)
+            //     var postID = data.comment_post_id;
+            //     $.ajax({
+            //         type: 'POST',
+            //         url: '/del_comment/' + DelcommentId + '/',
+            //         data: {
+            //             csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() 
+            //         },
+            //         success: function(data) {
+            //             var comment_count1 =  $('#comment-count1-' + postID);
+            //             if (data.commit) {
+            //                 $('#delete-comment-' + DelcommentId).remove();
+            //                 comment_count1.html( data.comment_count +' Comment'+ '<i style="margin-left: 5px;" class="fas fa-comment"></i>').css('color', 'black').css('font-weight', 'normal');
+            //             } else {
+            //                 alert('Không thể xóa comment: ' + data.error);
+            //             }
+            //         },    
+            //     });
+            // })
 
             $(document).on('submit', 'form[id^="repply-form1-"]', function(e) {
                 e.preventDefault();
@@ -1226,6 +1228,30 @@ $(document).on('submit', '#del_comments', function(e) {
             }
         },     
 });
+})
+
+$(document).on('submit', '#del_comments1', function(e) {
+    e.preventDefault();
+    var form = $(this);
+    var DelcommentId = form.data('del-id');
+    console.log(DelcommentId)
+    var postID = form.data('post-ids');
+    $.ajax({
+        type: 'POST',
+        url: '/del_comment/' + DelcommentId + '/',
+        data: {
+            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() 
+        },
+        success: function(data) {
+            var comment_count1 =  $('#comment-count1-' + postID);
+            if (data.commit) {
+                $('#delete-comment1-' + DelcommentId).remove();
+                comment_count1.html( data.comment_count +' Comment'+ '<i style="margin-left: 5px;" class="fas fa-comment"></i>').css('color', 'black').css('font-weight', 'normal');
+            } else {
+                alert('Không thể xóa comment: ' + data.error);
+            }
+        },    
+    });
 })
 
 $(document).on('submit', '#del_repply', function(e) {
