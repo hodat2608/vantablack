@@ -70,7 +70,7 @@
         </div>
         {% for post in posts%}
         
-            <div class="card">
+            <div class="card" id="delete-post-section-{{ post.id }}">
                 
                 <div>
                     <div class="txt">
@@ -82,10 +82,47 @@
                                 <div class="dropdown_post">
                                     <i class="fas fa-ellipsis-h dropdown_post-btn1" data-post-id="{{ post.id }}"></i>
                                     <div class="dropdown_post-content1 dropdown_post-content1-{{ post.id }}">
-                                        <a href="#">Lưu bài viết của {{post.post_user}}<i class="far fa-bookmark"></i></a>
+                                        <!-- <a href="#">Lưu bài viết của {{post.post_user}}<i class="far fa-bookmark"></i></a>
                                         <a href="#">Báo cáo bài viết <i class="fas fa-flag"></i></a>
                                         <a href="#">Ẩn bài viết của {{post.post_user}}<i class="far fa-eye-slash"></i></a>
-                                        <a href="#">Bật thông báo bài viết này <i class="far fa-bell"></i></a>
+                                        <a href="#">Bật thông báo bài viết này <i class="far fa-bell"></i></a> -->
+                                        <div class="button-group-on-post">
+                                            {% if post.post_user == request.user %}
+                                                <form action="{% url 'del_post' 0 %}" method="post" id="del_posts" data-del-post-id="{{ post.id }}">
+                                                    {% csrf_token %}
+                                                    <button type="submit"> <i class="far fa-bookmark"></i> Xóa bài viết </button>
+                                                </form>
+                                                <form action="#" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit"><i class="fas fa-flag"></i> Chỉnh sửa bài viết </button>
+                                                </form>      
+                                                <form action="#" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit"> <i class="far fa-eye-slash"></i> Ẩn bài viết </button>
+                                                </form>    
+                                                <form action="#" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit"> <i class="far fa-bookmark"></i> Chỉnh sửa đối tượng xem bài viết</button>
+                                                </form>                                     
+                                            {% else %}
+                                                <form action="{% url 'save_post_response' 0 %}" method="post" id="save_posts" data-save-post-id="{{ post.id }}">
+                                                    {% csrf_token %}
+                                                    <button type="submit"> <i class="far fa-eye-slash"></i> Lưu bài viết </button>
+                                                </form>
+                                                <form action="#" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit"> <i class="far fa-bookmark"></i> Báo cáo </button>
+                                                </form>
+                                                <form action="#" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit"> <i class="far fa-bookmark"></i> Ẩn bài viết </button>
+                                                </form>
+                                                <form action="#" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit"> <i class="far fa-eye-slash"></i> Bật thông báo bài viết </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                   </div>
                             </div>
@@ -807,29 +844,38 @@ for (let i = 0; i < posts.length; i++) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-      const dropdownBtns = document.querySelectorAll(".dropdown_post-btn1");
+  const dropdownBtns = document.querySelectorAll(".dropdown_post-btn1");
 
-      dropdownBtns.forEach(function(btn) {
-        btn.addEventListener("click", function() {
-          const postId = this.dataset.postId;
-          const dropdownContent = document.querySelector(`.dropdown_post-content1-${postId}`);
-          dropdownContent.classList.toggle("show1");
-        });
-      });
-
-      window.addEventListener("click", function(event) {
-        if (!event.target.matches(".dropdown_post-btn1")) {
-          const dropdownContents = document.querySelectorAll(".dropdown_post-content1");
-          dropdownContents.forEach(function(content) {
-            if (content.classList.contains("show1")) {
-              content.classList.remove("show1");
-            }
-          });
+  dropdownBtns.forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      const postId = this.dataset.postId;
+      const dropdownContent = document.querySelector(`.dropdown_post-content1-${postId}`);
+      
+      // Tắt tất cả dropdown content đang bật trước khi mở dropdown mới
+      const allDropdownContents = document.querySelectorAll(".dropdown_post-content1");
+      allDropdownContents.forEach(function(content) {
+        if (content.classList.contains("show1") && content !== dropdownContent) {
+          content.classList.remove("show1");
         }
       });
+      
+      // Mở dropdown content mới hoặc tắt nếu đã bật
+      dropdownContent.classList.toggle("show1");
     });
+  });
 
-  
+  window.addEventListener("click", function(event) {
+    if (!event.target.matches(".dropdown_post-btn1")) {
+      const dropdownContents = document.querySelectorAll(".dropdown_post-content1");
+      dropdownContents.forEach(function(content) {
+        if (content.classList.contains("show1")) {
+          content.classList.remove("show1");
+        }
+      });
+    }
+  });
+});
+
 
 $(document).on('submit', '#send-comment', function(e) {
     e.preventDefault();
@@ -950,30 +996,6 @@ $(document).on('submit', '#send-comment', function(e) {
             
             form.find('input[name="message"]').val('');
             $("#massage_image").val('');
-
-            // $(document).on('submit', '#del_comments1', function(e) {
-            //     e.preventDefault();
-            //     var form = $(this);
-            //     var DelcommentId = form.data('del-id');
-            //     console.log(DelcommentId)
-            //     var postID = data.comment_post_id;
-            //     $.ajax({
-            //         type: 'POST',
-            //         url: '/del_comment/' + DelcommentId + '/',
-            //         data: {
-            //             csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() 
-            //         },
-            //         success: function(data) {
-            //             var comment_count1 =  $('#comment-count1-' + postID);
-            //             if (data.commit) {
-            //                 $('#delete-comment-' + DelcommentId).remove();
-            //                 comment_count1.html( data.comment_count +' Comment'+ '<i style="margin-left: 5px;" class="fas fa-comment"></i>').css('color', 'black').css('font-weight', 'normal');
-            //             } else {
-            //                 alert('Không thể xóa comment: ' + data.error);
-            //             }
-            //         },    
-            //     });
-            // })
 
             $(document).on('submit', 'form[id^="repply-form1-"]', function(e) {
                 e.preventDefault();
@@ -1207,6 +1229,51 @@ $(document).on('submit', 'form[id^="repply-form-"]', function(e) {
     });
 });
 
+$(document).on('submit', '#del_posts', function(e) {
+    e.preventDefault();
+    var form = $(this);
+    var postID = form.data('del-post-id');
+    var confirmResult = confirm("Bạn có chắc chắn muốn xóa bài viết?");
+    if (confirmResult) {
+        $.ajax({
+            type: 'POST',
+            url: '/del_post/' + postID + '/',
+            data: {
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() 
+            },
+            success: function(data) {
+                if (data.commit) {
+                    $('#delete-post-section-' + postID).remove();
+                } else {
+                    alert('Không thể xóa bài viết: ' + data.error);
+                }
+            },
+        });
+    }
+});
+
+$(document).on('submit', '#save_posts', function(e) {
+    e.preventDefault();
+    var form = $(this);
+    var saveID = form.data('save-post-id');
+    toastr.options.timeOut = 4000;
+    $.ajax({
+        type: 'POST',
+        url: '/save_post_response/' + saveID + '/',
+        data: {
+            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val() 
+        },
+        success: function(data) {             
+            if (data.commit_save){
+                toastr.success('Đã lưu bài viết!', 'Thông báo');
+            }               
+            else {
+                toastr.success('Bài viết đã được lưu rồi bạn ơi ', 'Thông báo');             
+            }     
+        },
+    });   
+});
+
 $(document).on('submit', '#del_comments', function(e) {
     e.preventDefault();
     var form = $(this);
@@ -1296,17 +1363,17 @@ $(document).on('click', '.mode-font-rep-js', function() {
 });
 
 function toggleReppySection(commentID) {
-        var button = document.querySelector("#repply-button-" + commentID + " .toggle-repply-button");
-        var section = document.getElementById("Reppy-section-popup-" + commentID);
+    var button = document.querySelector("#repply-button-" + commentID + " .toggle-repply-button");
+    var section = document.getElementById("Reppy-section-popup-" + commentID);
 
-        if (section.style.display === "none" || section.style.display === "") {
-            section.style.display = "block";
-            button.textContent = "Thu gọn phản hồi";
-        } else {
-            section.style.display = "none";
-            button.textContent = "Xem phản hồi ...";
-        }
+    if (section.style.display === "none" || section.style.display === "") {
+        section.style.display = "block";
+        button.textContent = "Thu gọn phản hồi";
+    } else {
+        section.style.display = "none";
+        button.textContent = "Xem phản hồi ...";
     }
+}
 
 </script> 
 

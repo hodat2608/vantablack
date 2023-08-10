@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse 
-from .models import PostViews, CommentViews , User, ProfileUser,Repply_commentviews,share_post
+from .models import PostViews, CommentViews , User, ProfileUser,Repply_commentviews,share_post,save_post
 from django.shortcuts import get_object_or_404, render
 from .forms import user_post_form,user_send_comment_form,repply_comment_form
 from django.shortcuts import redirect
@@ -143,7 +143,24 @@ def create_post(request):
 def del_post(request,pk):
     del_post = get_object_or_404(PostViews,pk=pk)
     del_post.delete()
-    return redirect('post_profile',del_post.post_user_id)
+    commit =True
+    return JsonResponse({'commit':commit})
+
+def save_post_func(request,pk):
+    post_ids = PostViews.objects.get(pk=pk)
+    all_posts = save_post.objects.filter(user_save_id=request.user)
+    list_id_post =[]
+    print(list_id_post)
+    for ids in all_posts:
+        list_id_post.append(ids.post_save_id)
+    if request.method == 'POST':
+        if post_ids.id not in list_id_post:
+            save_post_id = save_post.objects.create(user_save=request.user,post_save=post_ids)
+            save_post_id.save()
+            commit_save = True
+        else:
+            commit_save = False
+        return JsonResponse({'commit_save':commit_save})
 
 @login_required(login_url='user_login')
 def search_user(request):

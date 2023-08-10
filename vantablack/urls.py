@@ -8,6 +8,7 @@ urlpatterns = [
     path('post_profile/<str:pk>/', views.profile_post, name = 'post_profile'),
     path('create_post/', views.create_post, name = 'create_post'),
     path('del_post/<str:pk>/', views.del_post, name = 'del_post'),
+    path('save_post_response/<str:pk>/', views.save_post_func, name = 'save_post_response'),
     path('del_comment/<str:pk>/', views.del_comment, name = 'del_comment'),
     path('del_repply_comment/<str:pk>/', views.del_repply_comment, name = 'del_repply_comment'),
     path('post_likes_post_profile/<str:pk>/', views.post_likes_post_profile, name = 'post_likes_post_profile'),

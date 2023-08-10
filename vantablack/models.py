@@ -166,7 +166,7 @@ class save_post(models.Model):
         ordering = ['-created']
 
     def __str__(self):
-        return self.created
+        return str(self.post_save)
 
 
     
