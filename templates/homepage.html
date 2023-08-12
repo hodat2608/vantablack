@@ -92,13 +92,10 @@
                                                     {% csrf_token %}
                                                     <button type="submit"> <i class="far fa-bookmark"></i> Xóa bài viết </button>
                                                 </form>
+                                                <button onclick="Modifytoggle('{{post.id}}')"><i class="fas fa-flag"></i> Chỉnh sửa bài viết </button>    
                                                 <form action="#" method="post">
                                                     {% csrf_token %}
-                                                    <button type="submit"><i class="fas fa-flag"></i> Chỉnh sửa bài viết </button>
-                                                </form>      
-                                                <form action="#" method="post">
-                                                    {% csrf_token %}
-                                                    <button type="submit"> <i class="far fa-eye-slash"></i> Ẩn bài viết </button>
+                                                    <button><i class="far fa-eye-slash"></i> Ẩn bài viết </button>
                                                 </form>    
                                                 <form action="#" method="post">
                                                     {% csrf_token %}
@@ -137,6 +134,29 @@
                     {% if post.post_image %}
                         <img class="img-post" src =" {{ post.post_image.url}}" width="600">
                     {% endif %}
+                </div>
+                
+                <div class="modify-post-popup" id="modify-{{post.id}}" style="display: none;">
+                    <div class="modify-card-shadow">
+                        <div class="txt">
+                            <a href="{% url 'post_profile' post.post_user_id %}">
+                                <img class="img123" src="{{ post.get_post_user_avatar.url }}">  
+                            <div class="datesince">
+                                <div class="three_dot_post_dropdown">
+                                    <a href="{% url 'post_profile' post.post_user_id %}">{{ post.post_user }}</a>
+                                    <button onclick="closeModifytoggle('{{post.id}}')"> close </button>
+                                </div>
+                                <li>{{post.created|timesince}} ago at {{ post.formatted_created_time}}</li>
+                            </div>
+                        </div>
+                        <h5>                    
+                            <textarea name='discription_sh' id="discription_sh" class="share-discription scroller" >{{ post.discription }}</textarea>
+                        </h5>
+                        <br>
+                        {% if post.post_image %}
+                            <img class="img-post" src =" {{ post.post_image.url}}" width="600">
+                        {% endif %}
+                    </div>
                 </div>
                 
                 <div>
@@ -259,23 +279,24 @@
                     
                     <textarea name='discription_sh' id="discription_sh" class="share-discription scroller" placeholder="say something about this post "></textarea>
                     
-                    <div class="card-sharepost-inner"> 
-                        <div class="txt">
-                            <a href="{% url 'post_profile' post.post_user_id %}">
-                            <img class="img123" src="{{ post.get_post_user_avatar.url }}">  
-                            <div class="datesince">
-                                <a href="{% url 'post_profile' post.post_user_id %}">{{ post.post_user }}</a>
-                                <li>{{post.created|timesince}} ago</li>
+                    <div class="box_share">
+                        <div class="card-sharepost-inner"> 
+                            <div class="txt">
+                                <a href="{% url 'post_profile' post.post_user_id %}">
+                                <img class="img123" src="{{ post.get_post_user_avatar.url }}">  
+                                <div class="datesince">
+                                    <a href="{% url 'post_profile' post.post_user_id %}">{{ post.post_user }}</a>
+                                    <li>{{post.created|timesince}} ago</li>
+                                </div>
                             </div>
+                            <div class="setonu">
+                                <h5 class="content-discription" id="content-discription-{{ post.id }}">{{ post.discription }}</h5>
+                                <a class="btn-collapse" id="toggle-btn-{{ post.id }}"></a>
+                            </div>
+                            {% if post.post_image %}
+                                <img class="img-post" src =" {{ post.post_image.url}}" width="585">
+                            {% endif %}                                              
                         </div>
-                        <div class="setonu">
-                            <h5 class="content-discription" id="content-discription-{{ post.id }}">{{ post.discription }}</h5>
-                            <a class="btn-collapse" id="toggle-btn-{{ post.id }}"></a>
-                        </div>
-                        {% if post.post_image %}
-                            <img class="img-post" src =" {{ post.post_image.url}}" width="600">
-                        {% endif %}                       
-                        
                     </div>
                     <br>
                     <button class="btnn" type="submit">Share post </button>
@@ -285,69 +306,248 @@
 
             <div class="popup" id="comment-popup-{{ post.id }}" style="display: none;">
 
-                <div class="card-shadow">
-                    
-                    <div>   
-                        <div class="txt">
-                            <a href="{% url 'post_profile' post.post_user_id %}">
-                                <img class="img123" src="{{ post.get_post_user_avatar.url }}">  
-                            <div class="datesince">
-                                <div class="close_icon_popup_comment_section">
-                                    <a href="{% url 'post_profile' post.post_user_id %}">{{ post.post_user }}</a>
-                                    <button onclick="closeCommentPopup('{{ post.id }}')"><i class="fas fa-times"></i></button>
-                                </div>
-                                <li>{{post.created|timesince}} ago</li>
+                <div class="card-shadow"> 
+                    <div class="title_box">
+                        <div class="post-container">
+                            <div class="post-content">
+                                Bài viết của {{post.post_user}}
                             </div>
-                        </div>
-
-                        <div class="setonu">
-                            <h5 class="content-discription" id="content-discription-{{ post.id }}">{{ post.discription }}</h5>
-                            <a class="btn-collapse" id="toggle-btn-{{ post.id }}"></a>
-                        </div>
-                        {% if post.post_image %}
-                            <img class="img-post-popup" src =" {{ post.post_image.url}}" width="640">
-                        {% endif %}   
-                        
-                    </div> 
-
-                    <div class="info-container">
-                        <div class="left-align">
-                            <p id="like-count-section-{{ post.id }}"></p>
-                        </div>
-                        <div class="right-align">
-                            {% if post.commentviews_set.count >= 1 %}
-                                <p id="comment-count1-{{ post.id }}">{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p>
-                            {% else %} 
-                                <p id="comment-count1-{{ post.id }}">.</p>
-                            {% endif %} 
-                            {% if post.post_shares.count > 0 %}
-                                <p>{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
-                            {% else %}
-                                <p>.</p>
-                            {% endif %} 
-                        </div>                     
+                            <a onclick="closeCommentPopup('{{ post.id }}')" class="close-link">
+                                <div class="close-icon-circle">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                            </a>
+                        </div>                                             
                     </div>
-            
-                    <div class="btn-group"> 
-                        <form action="{% url 'post_like_post_comment_section' 0 %}" method="post" id="like-popup-form" data-like-id-section="{{ post.id }}"
-                        data-liked-section="{% if request.user in post.post_likes.all %} true {% else %} false {% endif %}" >
-                            {% csrf_token %}
-                            <button type="submit" id="like-button-section-{{ post.id }}"> 
-                                {% if request.user in post.post_likes.all %}
-                                <a class="my-text"><i class="fas fa-thumbs-up"></i>Like</a>
+                    <div class="box_comment">
+                        <div>   
+                            <div class="txt">
+                                <a href="{% url 'post_profile' post.post_user_id %}">
+                                    <img class="img123" src="{{ post.get_post_user_avatar.url }}">  
+                                <div class="datesince">
+                                    <a href="{% url 'post_profile' post.post_user_id %}">{{ post.post_user }}</a>
+                                    <li>{{post.created|timesince}} ago</li>
+                                </div>
+                            </div>
+
+                            <div class="setonu">
+                                <h5 class="content-discription" id="content-discription-{{ post.id }}">{{ post.discription }}</h5>
+                                <a class="btn-collapse" id="toggle-btn-{{ post.id }}"></a>
+                            </div>
+                            {% if post.post_image %}
+                                <img class="img-post-popup" src =" {{ post.post_image.url}}" width="640">
+                            {% endif %}   
+                            
+                        </div> 
+
+                        <div class="info-container">
+                            <div class="left-align">
+                                <p id="like-count-section-{{ post.id }}"></p>
+                            </div>
+                            <div class="right-align">
+                                {% if post.commentviews_set.count >= 1 %}
+                                    <p id="comment-count1-{{ post.id }}">{{ post.commentviews_set.count }} comment{{post.commentviews_set.count|pluralize}} <i class="fas fa-comment"></i></p>
+                                {% else %} 
+                                    <p id="comment-count1-{{ post.id }}">.</p>
+                                {% endif %} 
+                                {% if post.post_shares.count > 0 %}
+                                    <p>{{ post.post_shares.count }} share{{post.post_shares.count|pluralize}} <i class="fas fa-share"></i></p>
                                 {% else %}
-                                <i class="fas fa-thumbs-up"></i> Like 
-                                {% endif %}
-                            </button >
-                        </form>
-                        <form action="#">
-                            {% csrf_token %}  
-                            <button type="submit"> <i class="fas fa-comment"></i> Comment</button>
-                        </form>
-                        
-                        <button type="submit" id="share-button-{{ post.id }}"> <i class="fas fa-share"></i> Share</button>
-                    </div>      
-                    <hr>
+                                    <p>.</p>
+                                {% endif %} 
+                            </div>                     
+                        </div>
+                        <hr>
+                        <div class="btn-group"> 
+                            <form action="{% url 'post_like_post_comment_section' 0 %}" method="post" id="like-popup-form" data-like-id-section="{{ post.id }}"
+                            data-liked-section="{% if request.user in post.post_likes.all %} true {% else %} false {% endif %}" >
+                                {% csrf_token %}
+                                <button type="submit" id="like-button-section-{{ post.id }}"> 
+                                    {% if request.user in post.post_likes.all %}
+                                    <a class="my-text"><i class="fas fa-thumbs-up"></i>Like</a>
+                                    {% else %}
+                                    <i class="fas fa-thumbs-up"></i> Like 
+                                    {% endif %}
+                                </button >
+                            </form>
+                            <form action="#">
+                                {% csrf_token %}  
+                                <button type="submit"> <i class="fas fa-comment"></i> Comment</button>
+                            </form>
+                            
+                            <button type="submit" id="share-button-{{ post.id }}"> <i class="fas fa-share"></i> Share</button>
+                        </div>      
+                        <!-- <div class="message-form-1">
+                            <form action="{% url 'send_comment' 0 %}" id="send-comment" data-send-id="{{ post.id }}" method="post" enctype="multipart/form-data" >
+                                {% csrf_token %}
+                                <div class="form-row-1">
+                                    <input type="text" name="message" id="message" placeholder="Type your message">
+                                    <label for="massage_image" class="upload-icon">
+                                        <input type="file" name="massage_image" id="massage_image" multiple>
+                                        <i class="fas fa-file-image"></i>
+                                    </label>
+                                    <button type="submit" class="send-button">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div> -->
+                        <!-- <div class="box_chat"> -->
+                            <div id="comment-section-{{ post.id }}">
+                                <!-- commmet will put on here -->
+                            </div>   
+                            {% for comment in post.commentviews_set.all %}
+                            <div class="comment_section_component" id="delete-comment-{{ comment.id }}">
+                                <div class="comment-avatar">
+                                    <div>
+                                        <a href="{% url 'post_profile' comment.comment_user_id %}">
+                                        <img class="img12" src="{{ comment.get_comment_user_avatar.url }}">
+                                    </div>
+                                    <div class="comment-card1">
+                                        <div class="dua_len_ngang_hang_va_dieu_chinh_khoang_cach">
+                                            <div id="comment-{{ comment.id }}">                                           
+                                                <div class="txt">
+                                                    <a href="{% url 'post_profile' comment.comment_user_id %}">{{comment.comment_user }}</a>
+                                                </div>
+                                                <small class="formatted-text">{{ comment.message }}</small>
+                                            </div>
+                                            <div class="dropdown_comment">
+                                                <span  class="dropbtn_comment"><i class="fas fa-ellipsis-v"></i></span>
+                                                <div id="myDropdown-{{ comment.id }}" class="dropdown-content_comment dropdown_comment-{{ comment.id }}">
+                                                    <div class="button-group-vertical">
+                                                        {% if comment.comment_user == request.user %}
+                                                            <form action="{% url 'del_comment' 0 %}" method="post" id="del_comments" data-del-id="{{ comment.id }}" data-posts-id="{{ post.id }}">
+                                                                {% csrf_token %}
+                                                                <button type="submit">Xóa bình luận</button>
+                                                            </form>
+                                                            <form action="#" method="post">
+                                                                {% csrf_token %}
+                                                                <button type="submit">Chỉnh sửa</button>
+                                                            </form>                                               
+                                                        {% else %}
+                                                            <form action="#" method="post">
+                                                                {% csrf_token %}
+                                                                <button type="submit">Ẩn bình luận</button>
+                                                            </form>
+                                                            <form action="#" method="post">
+                                                                {% csrf_token %}
+                                                                <button type="submit">Báo cáo</button>
+                                                            </form>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div> 
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    {% if comment.massage_image %}
+                                        <div class="dropdown-image">
+                                            <img src="{{ comment.massage_image.url }}" width="150" height="100">
+                                            <div class="dropdown-content-image">
+                                                {% if comment.massage_image %}
+                                                    <img src="{{ comment.massage_image.url }}" width="500" height="400">
+                                                {% endif %}                                                    
+                                                <div class="desc">Cinque Terre Unique</div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <button class="mode-font-rep" data-repply-form="{{ comment.id }}">Phản hồi</button>  
+                                    <button class="mode-font-like">Like</button> 
+                                </div>                           
+                                <div class="message-form">
+                                    <form action="{% url 'repply_comment' 0 %}" data-comment-id="{{ comment.id }}" id="repply-form-{{ comment.id }}"  method="post" enctype="multipart/form-data" style ="display: none;">
+                                        {% csrf_token %}
+                                        <div class="form-row">
+                                            <input type="text" name="rep_message" placeholder="Type your message">
+                                            <label for="rep_mess_image" class="upload-icon">
+                                                <input type="file" name="rep_mess_image" id="rep_mess_image" multiple>
+                                                <i class="fas fa-file-image"></i>
+                                            </label>
+                                            <button type="submit" class="send-button">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div id="repply-section-{{ comment.id }}">
+                                    <!-- Đây là nơi chứa các repply -->
+                                </div>
+                                <div id="Reppy-section-popup-{{ comment.id }}" style="display: none;">
+                                    {% if comment.repply_commentviews_set.all %}
+                                        {% for rep_comment in comment.repply_commentviews_set.all %}
+                                            <div class="repply_section_component" id="delete-repply-{{ rep_comment.id }}">
+                                                <div class="comment-avatar">
+                                                    <div>
+                                                        <a href="{% url 'post_profile' rep_comment.user_rep_id %}">
+                                                        <img class="img12" src="{{ rep_comment.get_repply_comment_user_avatar.url }}">
+                                                    </div>
+                                                    <div class="comment-card1">
+                                                        <div class="dua_len_ngang_hang_va_dieu_chinh_khoang_cach">
+                                                            <div id="rep_comment-{{ rep_comment.id }}">                                           
+                                                                <div class="txt">
+                                                                    <a href="{% url 'post_profile' rep_comment.user_rep_id %}">{{rep_comment.user_rep.username}}</a>
+                                                                </div>
+                                                                <small class="formatted-text">{{ rep_comment.rep_message }}</small>
+                                                            </div>
+                                                            <div class="dropdown_rep">
+                                                                <span onclick="Repply_component('{{ rep_comment.id }}')" class="dropbtn_rep"><i class="fas fa-ellipsis-v"></i></span>
+                                                                <div id="repply_dropdown-{{ rep_comment.id }}" class="dropdown-content_rep dropdown_rep-{{ rep_comment.id }}">
+                                                                <div class="button-group-vertical">
+                                                                    {% if rep_comment.user_rep == request.user %}
+                                                                        <form action="{% url 'del_repply_comment' 0 %}" method="post" id="del_repply" data-del-rep-id="{{ rep_comment.id }}">
+                                                                            {% csrf_token %}
+                                                                            <button type="submit">Xóa bình luận</button>
+                                                                        </form>
+                                                                        <form action="#" method="post">
+                                                                            {% csrf_token %}
+                                                                            <button type="submit">Chỉnh sửa</button>
+                                                                        </form>                                               
+                                                                    {% else %}
+                                                                        <form action="#" method="post">
+                                                                            {% csrf_token %}
+                                                                            <button type="submit">Ẩn bình luận</button>
+                                                                        </form>
+                                                                        <form action="#" method="post">
+                                                                            {% csrf_token %}
+                                                                            <button type="submit">Báo cáo</button>
+                                                                        </form>
+                                                                    {% endif %}
+                                                                </div>
+                                                                </div>
+                                                            </div> 
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    {% if rep_comment.rep_mess_image %}
+                                                        <div class="dropdown-image">
+                                                            <img src="{{ rep_comment.rep_mess_image.url }}" width="150" height="100">
+                                                            <div class="dropdown-content-image">
+                                                                {% if rep_comment.rep_mess_image %}
+                                                                    <img src="{{ rep_comment.rep_mess_image.url }}" width="500" height="400">
+                                                                {% endif %}                                                    
+                                                                <div class="desc">Cinque Terre Unique</div>
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                                <div id="repply-button-{{comment.id}}">
+                                    {% if comment.repply_commentviews_set.all %}
+                                    <i style="margin-left: 50px;font-size: 12px;" class="fas fa-arrow-right"></i><span class="toggle-repply-button" onclick="toggleReppySection('{{comment.id}}')">Xem phản hồi ...</span>
+                                    {% endif %}
+                                </div> 
+                            </div>
+                            <br>
+                            {% endfor %}
+                        <!-- </div>  -->
+                    </div>
                     <div class="message-form-1">
                         <form action="{% url 'send_comment' 0 %}" id="send-comment" data-send-id="{{ post.id }}" method="post" enctype="multipart/form-data" >
                             {% csrf_token %}
@@ -362,163 +562,7 @@
                                 </button>
                             </div>
                         </form>
-                    </div>
-                    <br>
-                    <div class="box_chat">
-                        <div id="comment-section-{{ post.id }}">
-                            <!-- commmet will put on here -->
-                        </div>   
-                        {% for comment in post.commentviews_set.all %}
-                        <div class="comment_section_component" id="delete-comment-{{ comment.id }}">
-                            <div class="comment-avatar">
-                                <div>
-                                    <a href="{% url 'post_profile' comment.comment_user_id %}">
-                                    <img class="img12" src="{{ comment.get_comment_user_avatar.url }}">
-                                </div>
-                                <div class="comment-card1">
-                                    <div class="dua_len_ngang_hang_va_dieu_chinh_khoang_cach">
-                                        <div id="comment-{{ comment.id }}">                                           
-                                            <div class="txt">
-                                                <a href="{% url 'post_profile' comment.comment_user_id %}">{{comment.comment_user }}</a>
-                                            </div>
-                                            <small class="formatted-text">{{ comment.message }}</small>
-                                        </div>
-                                        <div class="dropdown_comment">
-                                            <span  class="dropbtn_comment"><i class="fas fa-ellipsis-v"></i></span>
-                                            <div id="myDropdown-{{ comment.id }}" class="dropdown-content_comment dropdown_comment-{{ comment.id }}">
-                                                <div class="button-group-vertical">
-                                                    {% if comment.comment_user == request.user %}
-                                                        <form action="{% url 'del_comment' 0 %}" method="post" id="del_comments" data-del-id="{{ comment.id }}" data-posts-id="{{ post.id }}">
-                                                            {% csrf_token %}
-                                                            <button type="submit">Xóa bình luận</button>
-                                                        </form>
-                                                        <form action="#" method="post">
-                                                            {% csrf_token %}
-                                                            <button type="submit">Chỉnh sửa</button>
-                                                        </form>                                               
-                                                    {% else %}
-                                                        <form action="#" method="post">
-                                                            {% csrf_token %}
-                                                            <button type="submit">Ẩn bình luận</button>
-                                                        </form>
-                                                        <form action="#" method="post">
-                                                            {% csrf_token %}
-                                                            <button type="submit">Báo cáo</button>
-                                                        </form>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div> 
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                {% if comment.massage_image %}
-                                    <div class="dropdown-image">
-                                        <img src="{{ comment.massage_image.url }}" width="150" height="100">
-                                        <div class="dropdown-content-image">
-                                            {% if comment.massage_image %}
-                                                <img src="{{ comment.massage_image.url }}" width="500" height="400">
-                                            {% endif %}                                                    
-                                            <div class="desc">Cinque Terre Unique</div>
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div>
-                                <button class="mode-font-rep" data-repply-form="{{ comment.id }}">Phản hồi</button>  
-                                <button class="mode-font-like">Like</button> 
-                            </div>                           
-                            <div class="message-form">
-                                <form action="{% url 'repply_comment' 0 %}" data-comment-id="{{ comment.id }}" id="repply-form-{{ comment.id }}"  method="post" enctype="multipart/form-data" style ="display: none;">
-                                    {% csrf_token %}
-                                    <div class="form-row">
-                                        <input type="text" name="rep_message" placeholder="Type your message">
-                                        <label for="rep_mess_image" class="upload-icon">
-                                            <input type="file" name="rep_mess_image" id="rep_mess_image" multiple>
-                                            <i class="fas fa-file-image"></i>
-                                        </label>
-                                        <button type="submit" class="send-button">
-                                            <i class="fas fa-paper-plane"></i>
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                            <div id="repply-section-{{ comment.id }}">
-                                <!-- Đây là nơi chứa các repply -->
-                            </div>
-                            <div id="Reppy-section-popup-{{ comment.id }}" style="display: none;">
-                                {% if comment.repply_commentviews_set.all %}
-                                    {% for rep_comment in comment.repply_commentviews_set.all %}
-                                        <div class="repply_section_component" id="delete-repply-{{ rep_comment.id }}">
-                                            <div class="comment-avatar">
-                                                <div>
-                                                    <a href="{% url 'post_profile' rep_comment.user_rep_id %}">
-                                                    <img class="img12" src="{{ rep_comment.get_repply_comment_user_avatar.url }}">
-                                                </div>
-                                                <div class="comment-card1">
-                                                    <div class="dua_len_ngang_hang_va_dieu_chinh_khoang_cach">
-                                                        <div id="rep_comment-{{ rep_comment.id }}">                                           
-                                                            <div class="txt">
-                                                                <a href="{% url 'post_profile' rep_comment.user_rep_id %}">{{rep_comment.user_rep.username}}</a>
-                                                            </div>
-                                                            <small class="formatted-text">{{ rep_comment.rep_message }}</small>
-                                                        </div>
-                                                        <div class="dropdown_rep">
-                                                            <span onclick="Repply_component('{{ rep_comment.id }}')" class="dropbtn_rep"><i class="fas fa-ellipsis-v"></i></span>
-                                                            <div id="repply_dropdown-{{ rep_comment.id }}" class="dropdown-content_rep dropdown_rep-{{ rep_comment.id }}">
-                                                              <div class="button-group-vertical">
-                                                                {% if rep_comment.user_rep == request.user %}
-                                                                    <form action="{% url 'del_repply_comment' 0 %}" method="post" id="del_repply" data-del-rep-id="{{ rep_comment.id }}">
-                                                                        {% csrf_token %}
-                                                                        <button type="submit">Xóa bình luận</button>
-                                                                    </form>
-                                                                    <form action="#" method="post">
-                                                                        {% csrf_token %}
-                                                                        <button type="submit">Chỉnh sửa</button>
-                                                                    </form>                                               
-                                                                {% else %}
-                                                                    <form action="#" method="post">
-                                                                        {% csrf_token %}
-                                                                        <button type="submit">Ẩn bình luận</button>
-                                                                    </form>
-                                                                    <form action="#" method="post">
-                                                                        {% csrf_token %}
-                                                                        <button type="submit">Báo cáo</button>
-                                                                    </form>
-                                                                {% endif %}
-                                                              </div>
-                                                            </div>
-                                                        </div> 
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                {% if rep_comment.rep_mess_image %}
-                                                    <div class="dropdown-image">
-                                                        <img src="{{ rep_comment.rep_mess_image.url }}" width="150" height="100">
-                                                        <div class="dropdown-content-image">
-                                                            {% if rep_comment.rep_mess_image %}
-                                                                <img src="{{ rep_comment.rep_mess_image.url }}" width="500" height="400">
-                                                            {% endif %}                                                    
-                                                            <div class="desc">Cinque Terre Unique</div>
-                                                        </div>
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                                {% endif %}
-                            </div>
-                            <div id="repply-button-{{comment.id}}">
-                                {% if comment.repply_commentviews_set.all %}
-                                <i style="margin-left: 50px;font-size: 12px;" class="fas fa-arrow-right"></i><span class="toggle-repply-button" onclick="toggleReppySection('{{comment.id}}')">Xem phản hồi ...</span>
-                                {% endif %}
-                            </div> 
-                        </div>
-                        <br>
-                        {% endfor %}
-                    </div>      
+                    </div>     
                 </div>
             </div>
         {% endfor %}
@@ -1374,7 +1418,15 @@ function toggleReppySection(commentID) {
         button.textContent = "Xem phản hồi ...";
     }
 }
+function Modifytoggle(postId) {
+    var popup = document.getElementById("modify-" + postId);
+    popup.style.display = "block";
+}
 
+function closeModifytoggle(postId) {
+    var popup = document.getElementById("modify-" + postId);
+    popup.style.display = "none";
+}
 </script> 
 
 {% endblock %}

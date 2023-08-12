@@ -29,7 +29,7 @@ class PostViews(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-created']
+        ordering = ['-created','-updated']
 
     def __str__(self):
         return self.discription
