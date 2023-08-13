@@ -40,8 +40,6 @@
                 
             </div>
             
-            
-        
             <div class="widget-post" aria-labelledby="post-header-title" id="create-post-form" style="display: none;">
                 <form action="{% url 'create_post' %}" method="post" enctype="multipart/form-data" class="widget-post__form" aria-label="post widget">
                     {% csrf_token %}
@@ -150,11 +148,11 @@
                             </div>
                         </div>
                         <h5>                    
-                            <textarea name='discription_sh' id="discription_sh" class="share-discription scroller" >{{ post.discription }}</textarea>
+                            <textarea name='discription_sh' id="discription_sh" style="width:580px;height:150px;border:none;resize:none;outline:none;">{{ post.discription }}</textarea>
                         </h5>
                         <br>
                         {% if post.post_image %}
-                            <img class="img-post" src =" {{ post.post_image.url}}" width="600">
+                            <img class="img-páost" src =" {{ post.post_image.url}}" width="640">
                         {% endif %}
                     </div>
                 </div>
@@ -548,20 +546,26 @@
                             {% endfor %}
                         <!-- </div>  -->
                     </div>
-                    <div class="message-form-1">
-                        <form action="{% url 'send_comment' 0 %}" id="send-comment" data-send-id="{{ post.id }}" method="post" enctype="multipart/form-data" >
-                            {% csrf_token %}
-                            <div class="form-row-1">
-                                <input type="text" name="message" id="message" placeholder="Type your message">
-                                <label for="massage_image" class="upload-icon">
-                                    <input type="file" name="massage_image" id="massage_image" multiple>
-                                    <i class="fas fa-file-image"></i>
-                                </label>
-                                <button type="submit" class="send-button">
-                                    <i class="fas fa-paper-plane"></i>
-                                </button>
-                            </div>
-                        </form>
+                    <div class="comment-avatar">
+                        <div class="hirr">
+                            <!-- <a href="{% url 'post_profile' request.user.id %}"> -->
+                            <img class="img12" src="{{ request.user.profileuser.avatar.url }}">
+                        </div>
+                        <div class="message-form-1">
+                            <form action="{% url 'send_comment' 0 %}" id="send-comment" data-send-id="{{ post.id }}" method="post" enctype="multipart/form-data" >
+                                {% csrf_token %}
+                                <div class="form-row-1">
+                                    <textarea class="tearea_message autoresizing" type="text" name="message" id="autoresizing" placeholder="Type your message"></textarea>
+                                    <label for="massage_image" class="upload-icon">
+                                        <input type="file" name="massage_image" id="massage_image" multiple>
+                                        <i class="fas fa-file-image"></i>
+                                    </label>
+                                    <button type="submit" class="send-button">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>     
                 </div>
             </div>
@@ -572,18 +576,44 @@
         <h3 style="text-align: center;">Đang hoạt động</h3>
         <hr>
     </div>
-
 </div>
 
-<script 
-    src="https://code.jquery.com/jquery-3.5.1.js" 
-    integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" 
-    crossorigin="anonymous">
-</script>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $('.autoresizing').on('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+    $('[id^="send-comment-"]').each(function() {
+        const postID = this.getAttribute('data-send-id');
+        const textarea = document.getElementById("autoresizing-" + postID);
+
+        textarea.addEventListener("input", function() {
+            this.style.height = "auto";
+            this.style.height = (this.scrollHeight) + "px";
+        });
+    });
+});
+
+$('#createbox_post').on('input', function () {
+    this.style.height = 'auto';
+
+    this.style.height =
+        (this.scrollHeight) + 'px';
+});
+
+$('#discription_sh').on('input', function () {
+    this.style.height = 'auto';
+
+    this.style.height =
+        (this.scrollHeight) + 'px';
+});
 
 
-<script>
 var scrollPosition = localStorage.getItem("scrollPosition");
 if (scrollPosition) {
     $(window).scrollTop(scrollPosition);
@@ -925,7 +955,7 @@ $(document).on('submit', '#send-comment', function(e) {
     e.preventDefault();
     var form = $(this);
     var sendcommentId = form.data('send-id');
-    var message = form.find('input[name="message"]').val();
+    var message = form.find('textarea[name="message"]').val();
     var massageImage = $("#massage_image").prop('files')[0];
     var formData = new FormData();
     formData.append('message', message);
@@ -1038,7 +1068,7 @@ $(document).on('submit', '#send-comment', function(e) {
             var newComment = $(NewCommentHTML);
             $("#comment-section-" + sendcommentId).prepend(newComment);  
             
-            form.find('input[name="message"]').val('');
+            form.find('textarea[name="message"]').val('');
             $("#massage_image").val('');
 
             $(document).on('submit', 'form[id^="repply-form1-"]', function(e) {

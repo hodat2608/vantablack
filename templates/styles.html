@@ -61,24 +61,25 @@ body {
     box-shadow: 3px 8px 8px 3px rgba(0, 0, 0, 0.2);
     max-width: 600px;
     margin: 20px auto;
-    padding: 16px;
+    padding: 10px;
     background-color: #ffffff;
     border-radius: 5px;
+    height: auto;
     }   
 .card h5 {
-      font-size: 17px;
-      color: #333;
-      font-weight: normal;
-      margin-left: 0;
-      margin-top: 10px;
-    }   
+  font-size: 17px;
+  color: #333;
+  font-weight: normal;
+  margin-left: 0;
+  margin-top: 10px;
+}   
 /* .card p {
       font-size: 16px;
       color: blue;
     } */
 
 .img-post{
-  margin-left: -16px;
+  margin-left: -10px;
 }
 
 .img-post-popup{
@@ -94,14 +95,14 @@ body {
   
 /* button comment and like   */
 .btn-group button {
-    background-color: #ffffff;
-    border: none;
-    color: black; 
-    padding: 8px 10.6%;
-    cursor: pointer; 
-    float: left; 
-    border-radius: 50px;
-  } 
+  background-color: #ffffff;
+  border: none;
+  color: black; 
+  padding: 8px 10.6%;
+  cursor: pointer; 
+  float: left; 
+  border-radius: 50px;
+} 
 
  .btn-group a {
    font-weight: normal;
@@ -164,8 +165,7 @@ ul {
 
 .widget-post {
   width: auto;
-  min-height: 100px;
-  height: 250px;
+  height: auto;
 
   border: 1px solid #eaeaea;
   border-radius: 6px;
@@ -189,12 +189,12 @@ ul {
 
 .widget-post__content {
   width: 100%;
-  height: 50%;
+  height: 100%;
 }
 .widget-post__textarea {
   width: 100%;
   height: 100%;
-  padding: 10px 10px 125px 10px;
+  padding: 10px 10px 50px 10px;
   border: none;
   resize: none;
   white-space: pre-wrap;
@@ -229,7 +229,7 @@ ul {
 .post--actions {
   position: relative;
   padding: 0.2em;
-  top: 25px;
+  top: 0;
 
   background-color: #f5f5f5;
   color: #a2a6a7;
@@ -690,25 +690,32 @@ input[type="text"] {
   align-items: center;
   border: 1px solid #ccc;
   border-radius: 20px;
-  padding: 4px;
+  padding: 4px 10px;
   flex-grow: 1;
-  width: 269%;
+  width: auto;
   margin-left: 1px;
   
 }
-
-.form-row-1 input[type="text"] {
-  flex-grow: 1;
-  border: none;
-  padding: 2px;
-  outline: none;
-  background-color: #fffbfb;
-  width: 100%;
-  max-width: 100%;
-  min-height: 50px; /* Đặt kích thước tối thiểu cho input, ví dụ 20px */
+.tearea_message{
+  width:520px;
   height: auto;
+  text-align: left;
+  padding: 10px 10px 15px 10px;
+  border: none;
+  resize: none;
+  white-space: pre-wrap;
+  outline: none;
 }
 
+#autoresizing {
+  display: block;
+  overflow: hidden;
+  resize: none;
+}
+
+.hirr{
+  margin-top: 10px;
+}
 .upload-icon {
   display: flex;
   align-items: center;
@@ -744,8 +751,8 @@ input[type="text"] {
   width: 100%;
   height: 100%;
   display: none;
-  background-color: rgba(0, 0, 0, 0.5);
-  /* overflow-y: auto; */
+  background-color: rgba(137, 137, 137, 0.5);
+  overflow-y: auto;
 }
 
 .popup-content {
@@ -762,13 +769,14 @@ input[type="text"] {
 .card-shadow {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   width:685px;
-  height:93%;
+  height:auto;
   margin: 20px auto; 
   padding: 16px;
   background-color: #ffffff;
   border-radius: 10px;
   position: relative;
   overflow: hidden;
+  border: #000000;
   top: 0;
   z-index: 100;
 }
@@ -1348,7 +1356,6 @@ position: relative;
 top: 10%;
 z-index: 9999999;
 }
-
 
 
 </style>
